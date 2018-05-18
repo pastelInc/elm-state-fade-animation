@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Main</title>
+    <style>
+        html,head,body { padding:0; margin:0; }
+        body { font-family: calibri, helvetica, arial, sans-serif; }
+        @keyframes fadeIn {
+            0% {opacity: 0}
+            100% {opacity: 1}
+        }
+        @-webkit-keyframes fadeIn {
+            0% {opacity: 0}
+            100% {opacity: 1}
+        }
+        @keyframes fadeOut {
+            0% {opacity: 1}
+            100% {opacity: 0}
+        }
+        @-webkit-keyframes fadeOut {
+            0% {opacity: 1}
+            100% {opacity: 0}
+        }
+        .container.fadeIn {
+            animation: fadeIn 5s ease 0s 1 normal;
+            -webkit-animation: fadeIn 5s ease 0s 1 normal;
+        }
+        .container.fadeOut {
+            animation: fadeOut 2s ease 0s 1 normal;
+            -webkit-animation: fadeOut 2s ease 0s 1 normal;
+        }
+    </style>
+    <script src="elm.js"></script>
+</head>
+<body>
+    <script>
+      var app = Elm.Main.fullscreen();
+    </script>
+</body>
+</html>
