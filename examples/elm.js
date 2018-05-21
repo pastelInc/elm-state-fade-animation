@@ -8856,7 +8856,7 @@ var _user$project$FadeAnimation$state = function (current) {
 	return _user$project$FadeAnimation$FadeAnimation(
 		{
 			steps: {ctor: '[]'},
-			interruptions: {ctor: '[]'},
+			interruption: {ctor: '[]'},
 			motion: current,
 			running: false
 		});
@@ -8879,7 +8879,7 @@ var _user$project$FadeAnimation$interrupt = F2(
 		return _user$project$FadeAnimation$FadeAnimation(
 			_elm_lang$core$Native_Utils.update(
 				_p8._0,
-				{interruptions: steps, running: true}));
+				{interruption: steps, running: true}));
 	});
 var _user$project$FadeAnimation$To = function (a) {
 	return {ctor: 'To', _0: a};
@@ -8888,145 +8888,6 @@ var _user$project$FadeAnimation$to = _user$project$FadeAnimation$To;
 var _user$project$FadeAnimation$Hide = {ctor: 'Hide'};
 var _user$project$FadeAnimation$FadeOut = {ctor: 'FadeOut'};
 var _user$project$FadeAnimation$Show = {ctor: 'Show'};
-var _user$project$FadeAnimation$resolveSteps = F2(
-	function (currentMotion, steps) {
-		var _p9 = _elm_lang$core$List$head(steps);
-		if (_p9.ctor === 'Nothing') {
-			var _p10 = currentMotion;
-			switch (_p10.ctor) {
-				case 'FadeIn':
-					return {
-						ctor: '_Tuple3',
-						_0: _user$project$FadeAnimation$Show,
-						_1: {ctor: '[]'},
-						_2: {ctor: '[]'}
-					};
-				case 'FadeOut':
-					return {
-						ctor: '_Tuple3',
-						_0: _user$project$FadeAnimation$Hide,
-						_1: {ctor: '[]'},
-						_2: {ctor: '[]'}
-					};
-				default:
-					return {
-						ctor: '_Tuple3',
-						_0: currentMotion,
-						_1: {ctor: '[]'},
-						_2: {ctor: '[]'}
-					};
-			}
-		} else {
-			var _p11 = _p9._0;
-			return {
-				ctor: '_Tuple3',
-				_0: _p11._0,
-				_1: {ctor: '[]'},
-				_2: A2(_elm_lang$core$List$drop, 1, steps)
-			};
-		}
-	});
-var _user$project$FadeAnimation$updateAnimation = F2(
-	function (tick, _p12) {
-		var _p13 = _p12;
-		var _p18 = _p13._0;
-		var motion = _p18.motion;
-		var readyInterruptions = _p18.interruptions;
-		var steps = (_elm_lang$core$Native_Utils.cmp(
-			_elm_lang$core$List$length(readyInterruptions),
-			0) > 0) ? readyInterruptions : _p18.steps;
-		var _p14 = A2(_user$project$FadeAnimation$resolveSteps, motion, steps);
-		var revisedMotion = _p14._0;
-		var sentMessages = _p14._1;
-		var revisedSteps = _p14._2;
-		var _p15 = A2(_elm_lang$core$Debug$log, 'revisedSteps', revisedSteps);
-		var _p16 = A2(_elm_lang$core$Debug$log, 'revisedMotion', revisedMotion);
-		var _p17 = tick;
-		if (_p17.ctor === 'AnimationEnd') {
-			return {
-				ctor: '_Tuple2',
-				_0: _user$project$FadeAnimation$FadeAnimation(
-					_elm_lang$core$Native_Utils.update(
-						_p18,
-						{
-							running: !_elm_lang$core$Native_Utils.eq(
-								_elm_lang$core$List$length(revisedSteps),
-								0),
-							steps: revisedSteps,
-							motion: revisedMotion
-						})),
-				_1: _elm_lang$core$Platform_Cmd$batch(
-					A2(
-						_elm_lang$core$List$map,
-						function (m) {
-							return A2(
-								_elm_lang$core$Task$perform,
-								_elm_lang$core$Basics$identity,
-								_elm_lang$core$Task$succeed(m));
-						},
-						sentMessages))
-			};
-		} else {
-			return (_elm_lang$core$Native_Utils.cmp(
-				_elm_lang$core$List$length(readyInterruptions),
-				0) > 0) ? {
-				ctor: '_Tuple2',
-				_0: _user$project$FadeAnimation$FadeAnimation(
-					_elm_lang$core$Native_Utils.update(
-						_p18,
-						{
-							running: !_elm_lang$core$Native_Utils.eq(
-								_elm_lang$core$List$length(revisedSteps),
-								0),
-							steps: revisedSteps,
-							interruptions: {ctor: '[]'},
-							motion: revisedMotion
-						})),
-				_1: _elm_lang$core$Platform_Cmd$batch(
-					A2(
-						_elm_lang$core$List$map,
-						function (m) {
-							return A2(
-								_elm_lang$core$Task$perform,
-								_elm_lang$core$Basics$identity,
-								_elm_lang$core$Task$succeed(m));
-						},
-						sentMessages))
-			} : ((_elm_lang$core$Native_Utils.eq(motion, _user$project$FadeAnimation$Show) || _elm_lang$core$Native_Utils.eq(motion, _user$project$FadeAnimation$Hide)) ? {
-				ctor: '_Tuple2',
-				_0: _user$project$FadeAnimation$FadeAnimation(
-					_elm_lang$core$Native_Utils.update(
-						_p18,
-						{
-							running: !_elm_lang$core$Native_Utils.eq(
-								_elm_lang$core$List$length(revisedSteps),
-								0),
-							steps: revisedSteps,
-							interruptions: {ctor: '[]'},
-							motion: revisedMotion
-						})),
-				_1: _elm_lang$core$Platform_Cmd$batch(
-					A2(
-						_elm_lang$core$List$map,
-						function (m) {
-							return A2(
-								_elm_lang$core$Task$perform,
-								_elm_lang$core$Basics$identity,
-								_elm_lang$core$Task$succeed(m));
-						},
-						sentMessages))
-			} : {
-				ctor: '_Tuple2',
-				_0: _user$project$FadeAnimation$FadeAnimation(_p18),
-				_1: _elm_lang$core$Platform_Cmd$none
-			});
-		}
-	});
-var _user$project$FadeAnimation$update = F2(
-	function (tick, animation) {
-		return _elm_lang$core$Tuple$first(
-			A2(_user$project$FadeAnimation$updateAnimation, tick, animation));
-	});
 var _user$project$FadeAnimation$FadeIn = {ctor: 'FadeIn'};
 var _user$project$FadeAnimation$AnimationEnd = {ctor: 'AnimationEnd'};
 var _user$project$FadeAnimation$onAnimationend = function (msg) {
@@ -9038,6 +8899,89 @@ var _user$project$FadeAnimation$onAnimationend = function (msg) {
 			'animationend',
 			_elm_lang$core$Json_Decode$succeed(_user$project$FadeAnimation$AnimationEnd)));
 };
+var _user$project$FadeAnimation$alreadyAnimationEnd = function (tick) {
+	return _elm_lang$core$Native_Utils.eq(tick, _user$project$FadeAnimation$AnimationEnd);
+};
+var _user$project$FadeAnimation$resolveSteps = F4(
+	function (currentMotion, steps, tick, forceResolve) {
+		var _p9 = _elm_lang$core$List$head(steps);
+		if (_p9.ctor === 'Nothing') {
+			return {
+				ctor: '_Tuple3',
+				_0: currentMotion,
+				_1: {ctor: '[]'},
+				_2: {ctor: '[]'}
+			};
+		} else {
+			var _p10 = _p9._0;
+			var _p11 = _p10._0;
+			return _user$project$FadeAnimation$alreadyAnimationEnd(tick) ? {
+				ctor: '_Tuple3',
+				_0: _p11,
+				_1: {ctor: '[]'},
+				_2: A2(_elm_lang$core$List$drop, 1, steps)
+			} : (forceResolve ? {
+				ctor: '_Tuple3',
+				_0: _p11,
+				_1: {ctor: '[]'},
+				_2: A2(_elm_lang$core$List$drop, 1, steps)
+			} : ((_elm_lang$core$Native_Utils.eq(currentMotion, _user$project$FadeAnimation$Show) || _elm_lang$core$Native_Utils.eq(currentMotion, _user$project$FadeAnimation$Hide)) ? {
+				ctor: '_Tuple3',
+				_0: _p11,
+				_1: {ctor: '[]'},
+				_2: A2(_elm_lang$core$List$drop, 1, steps)
+			} : {
+				ctor: '_Tuple3',
+				_0: currentMotion,
+				_1: {ctor: '[]'},
+				_2: steps
+			}));
+		}
+	});
+var _user$project$FadeAnimation$updateAnimation = F2(
+	function (tick, _p12) {
+		var _p13 = _p12;
+		var _p19 = _p13._0;
+		var _p14 = {
+			ctor: '_Tuple2',
+			_0: _p19.interruption,
+			_1: {ctor: '[]'}
+		};
+		var readyInterruption = _p14._0;
+		var queuedInterruption = _p14._1;
+		var isInterrupt = _elm_lang$core$Native_Utils.cmp(
+			_elm_lang$core$List$length(readyInterruption),
+			0) > 0;
+		var _p15 = isInterrupt ? {ctor: '_Tuple2', _0: readyInterruption, _1: _p19.motion} : {ctor: '_Tuple2', _0: _p19.steps, _1: _p19.motion};
+		var steps = _p15._0;
+		var motion = _p15._1;
+		var _p16 = A4(_user$project$FadeAnimation$resolveSteps, motion, steps, tick, isInterrupt);
+		var revisedMotion = _p16._0;
+		var sentMessages = _p16._1;
+		var revisedSteps = _p16._2;
+		var _p17 = A2(_elm_lang$core$Debug$log, 'revisedSteps', revisedSteps);
+		var _p18 = A2(_elm_lang$core$Debug$log, 'revisedMotion', revisedMotion);
+		return {
+			ctor: '_Tuple2',
+			_0: _user$project$FadeAnimation$FadeAnimation(
+				_elm_lang$core$Native_Utils.update(
+					_p19,
+					{
+						running: !_elm_lang$core$Native_Utils.eq(
+							_elm_lang$core$List$length(revisedSteps),
+							0),
+						steps: revisedSteps,
+						motion: revisedMotion,
+						interruption: queuedInterruption
+					})),
+			_1: _elm_lang$core$Platform_Cmd$none
+		};
+	});
+var _user$project$FadeAnimation$update = F2(
+	function (tick, animation) {
+		return _elm_lang$core$Tuple$first(
+			A2(_user$project$FadeAnimation$updateAnimation, tick, animation));
+	});
 var _user$project$FadeAnimation$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
@@ -9067,7 +9011,11 @@ var _user$project$Main$update = F2(
 									_1: {
 										ctor: '::',
 										_0: _user$project$FadeAnimation$to(_user$project$FadeAnimation$FadeIn),
-										_1: {ctor: '[]'}
+										_1: {
+											ctor: '::',
+											_0: _user$project$FadeAnimation$to(_user$project$FadeAnimation$Show),
+											_1: {ctor: '[]'}
+										}
 									}
 								},
 								model.state)
@@ -9088,7 +9036,11 @@ var _user$project$Main$update = F2(
 									_1: {
 										ctor: '::',
 										_0: _user$project$FadeAnimation$to(_user$project$FadeAnimation$FadeOut),
-										_1: {ctor: '[]'}
+										_1: {
+											ctor: '::',
+											_0: _user$project$FadeAnimation$to(_user$project$FadeAnimation$Hide),
+											_1: {ctor: '[]'}
+										}
 									}
 								},
 								model.state)

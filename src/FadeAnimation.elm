@@ -18,7 +18,6 @@ import Html exposing (Html)
 import Html.Attributes
 import Html.Events
 import Json.Decode
-import Task
 import Time exposing (Time)
 import Tuple
 
@@ -26,7 +25,7 @@ import Tuple
 type FadeAnimation
     = FadeAnimation
         { steps : List Step
-        , interruptions : List Step
+        , interruption : List Step
         , motion : Motion
         , running : Bool
         }
@@ -56,7 +55,7 @@ state : Motion -> FadeAnimation
 state current =
     FadeAnimation
         { steps = []
-        , interruptions = []
+        , interruption = []
         , motion = current
         , running = False
         }
@@ -80,7 +79,7 @@ interrupt : List Step -> FadeAnimation -> FadeAnimation
 interrupt steps (FadeAnimation model) =
     FadeAnimation
         { model
-            | interruptions = steps
+            | interruption = steps
             , running = True
         }
 
@@ -92,7 +91,9 @@ onAnimationend msg =
 
 
 {-| Create a subscription to AnimationFrame.times.
+
 It is throttled based on whether the current animation is running or not.
+
 -}
 subscription : (Msg -> msgB) -> List FadeAnimation -> Sub msgB
 subscription msg states =
@@ -115,23 +116,20 @@ update tick animation =
 updateAnimation : Tick -> FadeAnimation -> ( FadeAnimation, Cmd msg )
 updateAnimation tick (FadeAnimation model) =
     let
-        readyInterruptions =
-            model.interruptions
+        ( readyInterruption, queuedInterruption ) =
+            ( model.interruption, [] )
 
-        -- if there is more than one matching interruptions,
-        -- we only take the first, which is the one that was most recently assigned.
-        -- If an interruption does occur, we need to clear any interpolation overrides.
-        steps =
-            if List.length readyInterruptions > 0 then
-                readyInterruptions
+        isInterrupt =
+            List.length readyInterruption > 0
+
+        ( steps, motion ) =
+            if isInterrupt then
+                ( readyInterruption, model.motion )
             else
-                model.steps
-
-        motion =
-            model.motion
+                ( model.steps, model.motion )
 
         ( revisedMotion, sentMessages, revisedSteps ) =
-            resolveSteps motion steps
+            resolveSteps motion steps tick isInterrupt
 
         _ =
             Debug.log "revisedSteps" revisedSteps
@@ -139,69 +137,50 @@ updateAnimation tick (FadeAnimation model) =
         _ =
             Debug.log "revisedMotion" revisedMotion
     in
-    case tick of
-        AnimationEnd ->
-            ( FadeAnimation
-                { model
-                    | running =
-                        List.length revisedSteps
-                            /= 0
-                    , steps = revisedSteps
-                    , motion = revisedMotion
-                }
-            , Cmd.batch <| List.map (\m -> Task.perform identity (Task.succeed m)) sentMessages
-            )
-
-        Tick now ->
-            if List.length readyInterruptions > 0 then
-                ( FadeAnimation
-                    { model
-                        | running =
-                            List.length revisedSteps
-                                /= 0
-                        , steps = revisedSteps
-                        , interruptions = []
-                        , motion = revisedMotion
-                    }
-                , Cmd.batch <| List.map (\m -> Task.perform identity (Task.succeed m)) sentMessages
-                )
-            else if (motion == Show) || (motion == Hide) then
-                ( FadeAnimation
-                    { model
-                        | running =
-                            List.length revisedSteps
-                                /= 0
-                        , steps = revisedSteps
-                        , interruptions = []
-                        , motion = revisedMotion
-                    }
-                , Cmd.batch <| List.map (\m -> Task.perform identity (Task.succeed m)) sentMessages
-                )
-            else
-                ( FadeAnimation model, Cmd.none )
+    ( FadeAnimation
+        { model
+            | running =
+                List.length revisedSteps
+                    /= 0
+            , steps = revisedSteps
+            , motion = revisedMotion
+            , interruption = queuedInterruption
+        }
+    , Cmd.none
+    )
 
 
-resolveSteps : Motion -> List Step -> ( Motion, List msg, List Step )
-resolveSteps currentMotion steps =
+resolveSteps : Motion -> List Step -> Tick -> Bool -> ( Motion, List msg, List Step )
+resolveSteps currentMotion steps tick forceResolve =
     case List.head steps of
         Nothing ->
-            case currentMotion of
-                FadeIn ->
-                    ( Show, [], [] )
-
-                FadeOut ->
-                    ( Hide, [], [] )
-
-                _ ->
-                    ( currentMotion, [], [] )
+            ( currentMotion, [], [] )
 
         Just currentStep ->
             case currentStep of
                 To target ->
-                    ( target
-                    , []
-                    , List.drop 1 steps
-                    )
+                    if alreadyAnimationEnd tick then
+                        ( target
+                        , []
+                        , List.drop 1 steps
+                        )
+                    else if forceResolve then
+                        ( target
+                        , []
+                        , List.drop 1 steps
+                        )
+                    else if (currentMotion == Show) || (currentMotion == Hide) then
+                        ( target
+                        , []
+                        , List.drop 1 steps
+                        )
+                    else
+                        ( currentMotion, [], steps )
+
+
+alreadyAnimationEnd : Tick -> Bool
+alreadyAnimationEnd tick =
+    tick == AnimationEnd
 
 
 render : FadeAnimation -> Motion

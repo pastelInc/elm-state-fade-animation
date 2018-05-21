@@ -50,6 +50,7 @@ update action model =
                     FadeAnimation.interrupt
                         [ FadeAnimation.to FadeAnimation.Hide
                         , FadeAnimation.to FadeAnimation.FadeIn
+                        , FadeAnimation.to FadeAnimation.Show
                         ]
                         model.state
               }
@@ -62,6 +63,7 @@ update action model =
                     FadeAnimation.queue
                         [ FadeAnimation.to FadeAnimation.Show
                         , FadeAnimation.to FadeAnimation.FadeOut
+                        , FadeAnimation.to FadeAnimation.Hide
                         ]
                         model.state
               }
