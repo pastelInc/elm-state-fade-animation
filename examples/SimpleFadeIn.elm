@@ -32,7 +32,7 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch []
+    FadeAnimation.subscription Animate [ model.state ]
 
 
 type Msg
@@ -47,8 +47,9 @@ update action model =
         FadeIn ->
             ( { model
                 | state =
-                    FadeAnimation.start
-                        [ FadeAnimation.to FadeAnimation.FadeIn
+                    FadeAnimation.interrupt
+                        [ FadeAnimation.to FadeAnimation.Hide
+                        , FadeAnimation.to FadeAnimation.FadeIn
                         ]
                         model.state
               }
@@ -58,8 +59,9 @@ update action model =
         FadeOut ->
             ( { model
                 | state =
-                    FadeAnimation.start
-                        [ FadeAnimation.to FadeAnimation.FadeOut
+                    FadeAnimation.queue
+                        [ FadeAnimation.to FadeAnimation.Show
+                        , FadeAnimation.to FadeAnimation.FadeOut
                         ]
                         model.state
               }
