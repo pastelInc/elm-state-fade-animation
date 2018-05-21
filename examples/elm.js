@@ -8476,12 +8476,6 @@ var _user$project$FadeAnimation$isRunning = function (_p3) {
 	var _p4 = _p3;
 	return _p4._0.running;
 };
-var _user$project$FadeAnimation$onAnimationend = function (tagger) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'animationend',
-		_elm_lang$core$Json_Decode$succeed(tagger));
-};
 var _user$project$FadeAnimation$KeyFrame = F4(
 	function (a, b, c, d) {
 		return {fadeIn: a, show: b, hide: c, fadeOut: d};
@@ -8599,6 +8593,15 @@ var _user$project$FadeAnimation$queue = F2(
 						steps: A2(_elm_lang$core$Basics_ops['++'], _p19.steps, steps)
 					})));
 	});
+var _user$project$FadeAnimation$onAnimationend = function (msg) {
+	return A2(
+		_elm_lang$html$Html_Attributes$map,
+		msg,
+		A2(
+			_elm_lang$html$Html_Events$on,
+			'animationend',
+			_elm_lang$core$Json_Decode$succeed(_user$project$FadeAnimation$Tick)));
+};
 
 var _user$project$Main$renderHide = A2(
 	_elm_lang$html$Html$div,
@@ -8808,8 +8811,7 @@ var _user$project$Main$renderFadeIn = A2(
 			_0: _elm_lang$html$Html_Attributes$class('container fadeIn'),
 			_1: {
 				ctor: '::',
-				_0: _user$project$FadeAnimation$onAnimationend(
-					_user$project$Main$Animate(_user$project$FadeAnimation$Tick)),
+				_0: _user$project$FadeAnimation$onAnimationend(_user$project$Main$Animate),
 				_1: {ctor: '[]'}
 			}
 		}
@@ -8862,8 +8864,7 @@ var _user$project$Main$renderFadeOut = A2(
 			_0: _elm_lang$html$Html_Attributes$class('container fadeOut'),
 			_1: {
 				ctor: '::',
-				_0: _user$project$FadeAnimation$onAnimationend(
-					_user$project$Main$Animate(_user$project$FadeAnimation$Tick)),
+				_0: _user$project$FadeAnimation$onAnimationend(_user$project$Main$Animate),
 				_1: {ctor: '[]'}
 			}
 		}

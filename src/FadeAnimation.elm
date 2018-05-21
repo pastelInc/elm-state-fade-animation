@@ -1,10 +1,11 @@
 module FadeAnimation exposing (..)
 
-import Tuple
-import Task
 import Html exposing (Html)
+import Html.Attributes
 import Html.Events
 import Json.Decode
+import Task
+import Tuple
 
 
 type FadeAnimation
@@ -51,21 +52,6 @@ state current =
         }
 
 
-
---toFadeIn : Step
---toFadeIn =
---    To FadeIn
---toFadeOut : Step
---toFadeOut =
---    To FadeOut
---toShow : Step
---toShow =
---    To Show
---toHide : Step
---toHide =
---    To Hide
-
-
 to : Property -> Step
 to =
     To
@@ -80,9 +66,10 @@ queue steps (FadeAnimation model) =
             }
 
 
-onAnimationend : msg -> Html.Attribute msg
-onAnimationend tagger =
-    Html.Events.on "animationend" (Json.Decode.succeed tagger)
+onAnimationend : (Msg -> msgB) -> Html.Attribute msgB
+onAnimationend msg =
+    Html.Attributes.map msg <|
+        Html.Events.on "animationend" (Json.Decode.succeed Tick)
 
 
 isRunning : FadeAnimation -> Bool
@@ -113,18 +100,18 @@ updateAnimation Tick (FadeAnimation model) =
         _ =
             Debug.log "revisedStyle" revisedStyle
     in
-        ( FadeAnimation
-            { model
-                | running =
-                    revisedStyle
-                        /= Show
-                        && revisedStyle
-                        /= Hide
-                , steps = revisedSteps
-                , style = revisedStyle
-            }
-        , Cmd.batch <| List.map (\m -> Task.perform identity (Task.succeed m)) sentMessages
-        )
+    ( FadeAnimation
+        { model
+            | running =
+                revisedStyle
+                    /= Show
+                    && revisedStyle
+                    /= Hide
+            , steps = revisedSteps
+            , style = revisedStyle
+        }
+    , Cmd.batch <| List.map (\m -> Task.perform identity (Task.succeed m)) sentMessages
+    )
 
 
 resolveSteps : Property -> List Step -> ( Property, List msg, List Step )

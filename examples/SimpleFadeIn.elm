@@ -80,22 +80,22 @@ view model =
         _ =
             Debug.log "render" model
     in
-        div
-            []
-            [ renderFadeContainer model
-            , button
-                [ onClick FadeIn
-                ]
-                [ text "Click to fade-in animate!" ]
-            , button
-                [ onClick FadeOut
-                ]
-                [ text "Click to fade-out animate!" ]
-            , button
-                [ onClick <| Animate FadeAnimation.Tick
-                ]
-                [ text "Click to emit animationend!" ]
+    div
+        []
+        [ renderFadeContainer model
+        , button
+            [ onClick FadeIn
             ]
+            [ text "Click to fade-in animate!" ]
+        , button
+            [ onClick FadeOut
+            ]
+            [ text "Click to fade-out animate!" ]
+        , button
+            [ onClick <| Animate FadeAnimation.Tick
+            ]
+            [ text "Click to emit animationend!" ]
+        ]
 
 
 renderFadeContainer : Model -> Html Msg
@@ -123,7 +123,7 @@ renderFadeIn =
             , ( "opacity", "1" )
             ]
         , class "container fadeIn"
-        , FadeAnimation.onAnimationend <| Animate FadeAnimation.Tick
+        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]
 
@@ -160,7 +160,7 @@ renderFadeOut =
             , ( "opacity", "0" )
             ]
         , class "container fadeOut"
-        , FadeAnimation.onAnimationend <| Animate FadeAnimation.Tick
+        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]
 
