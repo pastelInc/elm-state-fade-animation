@@ -47,7 +47,7 @@ update action model =
         FadeIn ->
             ( { model
                 | state =
-                    FadeAnimation.queue
+                    FadeAnimation.start
                         [ FadeAnimation.to FadeAnimation.FadeIn
                         ]
                         model.state
@@ -58,7 +58,7 @@ update action model =
         FadeOut ->
             ( { model
                 | state =
-                    FadeAnimation.queue
+                    FadeAnimation.start
                         [ FadeAnimation.to FadeAnimation.FadeOut
                         ]
                         model.state
@@ -91,22 +91,28 @@ view model =
             [ onClick FadeOut
             ]
             [ text "Click to fade-out animate!" ]
-        , button
-            [ onClick <| Animate FadeAnimation.Tick
-            ]
-            [ text "Click to emit animationend!" ]
         ]
 
 
 renderFadeContainer : Model -> Html Msg
 renderFadeContainer model =
-    FadeAnimation.render
-        { fadeIn = renderFadeIn
-        , show = renderShow
-        , hide = renderHide
-        , fadeOut = renderFadeOut
-        }
-        model.state
+    let
+        keyFrame =
+            FadeAnimation.render
+                model.state
+    in
+    case keyFrame of
+        FadeAnimation.FadeIn ->
+            renderFadeIn
+
+        FadeAnimation.Show ->
+            renderShow
+
+        FadeAnimation.Hide ->
+            renderHide
+
+        FadeAnimation.FadeOut ->
+            renderFadeOut
 
 
 renderFadeIn : Html Msg
@@ -142,6 +148,7 @@ renderShow =
             , ( "opacity", "1" )
             ]
         , class "container"
+        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]
 
@@ -179,5 +186,6 @@ renderHide =
             , ( "opacity", "0" )
             ]
         , class "container"
+        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]

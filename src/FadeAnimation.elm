@@ -1,4 +1,15 @@
-module FadeAnimation exposing (..)
+module FadeAnimation
+    exposing
+        ( FadeAnimation
+        , Motion(..)
+        , Msg
+        , onAnimationend
+        , render
+        , start
+        , state
+        , to
+        , update
+        )
 
 import Html exposing (Html)
 import Html.Attributes
@@ -11,16 +22,16 @@ import Tuple
 type FadeAnimation
     = FadeAnimation
         { steps : List Step
-        , style : Property
+        , motion : Motion
         , running : Bool
         }
 
 
 type Step
-    = To Property
+    = To Motion
 
 
-type Property
+type Motion
     = FadeIn
     | Show
     | FadeOut
@@ -35,30 +46,22 @@ type Tick
     = Tick
 
 
-type alias KeyFrame msg =
-    { fadeIn : Html msg
-    , show : Html msg
-    , hide : Html msg
-    , fadeOut : Html msg
-    }
-
-
-state : Property -> FadeAnimation
+state : Motion -> FadeAnimation
 state current =
     FadeAnimation
         { steps = []
-        , style = current
+        , motion = current
         , running = False
         }
 
 
-to : Property -> Step
+to : Motion -> Step
 to =
     To
 
 
-queue : List Step -> FadeAnimation -> FadeAnimation
-queue steps (FadeAnimation model) =
+start : List Step -> FadeAnimation -> FadeAnimation
+start steps (FadeAnimation model) =
     update Tick <|
         FadeAnimation
             { model
@@ -72,11 +75,6 @@ onAnimationend msg =
         Html.Events.on "animationend" (Json.Decode.succeed Tick)
 
 
-isRunning : FadeAnimation -> Bool
-isRunning (FadeAnimation model) =
-    model.running
-
-
 update : Msg -> FadeAnimation -> FadeAnimation
 update tick animation =
     Tuple.first <| updateAnimation tick animation
@@ -88,37 +86,37 @@ updateAnimation Tick (FadeAnimation model) =
         -- if there is more than one matching interruptions,
         -- we only take the first, which is the one that was most recently assigned.
         -- If an interruption does occur, we need to clear any interpolation overrides.
-        ( steps, style ) =
-            ( model.steps, model.style )
+        ( steps, motion ) =
+            ( model.steps, model.motion )
 
-        ( revisedStyle, sentMessages, revisedSteps ) =
-            resolveSteps style steps
+        ( revisedMotion, sentMessages, revisedSteps ) =
+            resolveSteps motion steps
 
         _ =
             Debug.log "revisedSteps" revisedSteps
 
         _ =
-            Debug.log "revisedStyle" revisedStyle
+            Debug.log "revisedMotion" revisedMotion
     in
     ( FadeAnimation
         { model
             | running =
-                revisedStyle
+                revisedMotion
                     /= Show
-                    && revisedStyle
+                    && revisedMotion
                     /= Hide
             , steps = revisedSteps
-            , style = revisedStyle
+            , motion = revisedMotion
         }
     , Cmd.batch <| List.map (\m -> Task.perform identity (Task.succeed m)) sentMessages
     )
 
 
-resolveSteps : Property -> List Step -> ( Property, List msg, List Step )
-resolveSteps style steps =
+resolveSteps : Motion -> List Step -> ( Motion, List msg, List Step )
+resolveSteps motion steps =
     case List.head steps of
         Nothing ->
-            case style of
+            case motion of
                 FadeIn ->
                     ( Show, [], [] )
 
@@ -126,7 +124,7 @@ resolveSteps style steps =
                     ( Hide, [], [] )
 
                 _ ->
-                    ( style, [], [] )
+                    ( motion, [], [] )
 
         Just currentStep ->
             case currentStep of
@@ -137,17 +135,6 @@ resolveSteps style steps =
                     )
 
 
-render : KeyFrame msg -> FadeAnimation -> Html msg
-render frame (FadeAnimation model) =
-    case model.style of
-        FadeIn ->
-            frame.fadeIn
-
-        Show ->
-            frame.show
-
-        Hide ->
-            frame.hide
-
-        FadeOut ->
-            frame.fadeOut
+render : FadeAnimation -> Motion
+render (FadeAnimation model) =
+    model.motion
