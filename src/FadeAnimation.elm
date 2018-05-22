@@ -3,13 +3,14 @@ module FadeAnimation
         ( FadeAnimation
         , Motion(..)
         , Msg
+        , fadeIn
+        , fadeOut
         , interrupt
         , onAnimationend
         , queue
         , render
         , state
         , subscription
-        , to
         , update
         )
 
@@ -24,15 +25,11 @@ import Tuple
 
 type FadeAnimation
     = FadeAnimation
-        { steps : List Step
-        , interruption : List Step
+        { steps : List Motion
+        , interruption : List Motion
         , motion : Motion
         , running : Bool
         }
-
-
-type Step
-    = To Motion
 
 
 type Motion
@@ -42,6 +39,26 @@ type Motion
     | Hide
 
 
+type alias Composition =
+    List Motion
+
+
+fadeIn : Composition
+fadeIn =
+    [ Hide
+    , FadeIn
+    , Show
+    ]
+
+
+fadeOut : Composition
+fadeOut =
+    [ Show
+    , FadeOut
+    , Hide
+    ]
+
+
 type alias Msg =
     Tick
 
@@ -49,6 +66,11 @@ type alias Msg =
 type Tick
     = Tick Time
     | AnimationEnd
+
+
+unzipComposition : List Composition -> List Motion
+unzipComposition compositions =
+    List.foldl (\composition steps -> List.concat [ composition, steps ]) [] compositions
 
 
 state : Motion -> FadeAnimation
@@ -61,13 +83,12 @@ state current =
         }
 
 
-to : Motion -> Step
-to =
-    To
-
-
-queue : List Step -> FadeAnimation -> FadeAnimation
-queue steps (FadeAnimation model) =
+queue : List Composition -> FadeAnimation -> FadeAnimation
+queue compositions (FadeAnimation model) =
+    let
+        steps =
+            unzipComposition compositions
+    in
     FadeAnimation
         { model
             | steps = model.steps ++ steps
@@ -75,8 +96,12 @@ queue steps (FadeAnimation model) =
         }
 
 
-interrupt : List Step -> FadeAnimation -> FadeAnimation
-interrupt steps (FadeAnimation model) =
+interrupt : List Composition -> FadeAnimation -> FadeAnimation
+interrupt compositions (FadeAnimation model) =
+    let
+        steps =
+            unzipComposition compositions
+    in
     FadeAnimation
         { model
             | interruption = steps
@@ -150,32 +175,30 @@ updateAnimation tick (FadeAnimation model) =
     )
 
 
-resolveSteps : Motion -> List Step -> Tick -> Bool -> ( Motion, List msg, List Step )
+resolveSteps : Motion -> List Motion -> Tick -> Bool -> ( Motion, List msg, List Motion )
 resolveSteps currentMotion steps tick forceResolve =
     case List.head steps of
         Nothing ->
             ( currentMotion, [], [] )
 
-        Just currentStep ->
-            case currentStep of
-                To target ->
-                    if alreadyAnimationEnd tick then
-                        ( target
-                        , []
-                        , List.drop 1 steps
-                        )
-                    else if forceResolve then
-                        ( target
-                        , []
-                        , List.drop 1 steps
-                        )
-                    else if (currentMotion == Show) || (currentMotion == Hide) then
-                        ( target
-                        , []
-                        , List.drop 1 steps
-                        )
-                    else
-                        ( currentMotion, [], steps )
+        Just target ->
+            if alreadyAnimationEnd tick then
+                ( target
+                , []
+                , List.drop 1 steps
+                )
+            else if forceResolve then
+                ( target
+                , []
+                , List.drop 1 steps
+                )
+            else if (currentMotion == Show) || (currentMotion == Hide) then
+                ( target
+                , []
+                , List.drop 1 steps
+                )
+            else
+                ( currentMotion, [], steps )
 
 
 alreadyAnimationEnd : Tick -> Bool

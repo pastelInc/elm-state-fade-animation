@@ -48,9 +48,7 @@ update action model =
             ( { model
                 | state =
                     FadeAnimation.interrupt
-                        [ FadeAnimation.to FadeAnimation.Hide
-                        , FadeAnimation.to FadeAnimation.FadeIn
-                        , FadeAnimation.to FadeAnimation.Show
+                        [ FadeAnimation.fadeIn
                         ]
                         model.state
               }
@@ -61,9 +59,7 @@ update action model =
             ( { model
                 | state =
                     FadeAnimation.queue
-                        [ FadeAnimation.to FadeAnimation.Show
-                        , FadeAnimation.to FadeAnimation.FadeOut
-                        , FadeAnimation.to FadeAnimation.Hide
+                        [ FadeAnimation.fadeOut
                         ]
                         model.state
               }
