@@ -8841,327 +8841,122 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _user$project$FadeAnimation$render = function (_p0) {
+var _user$project$FadeAnimation1$render = function (_p0) {
 	var _p1 = _p0;
 	return _p1._0.motion;
 };
-var _user$project$FadeAnimation$isRunning = function (_p2) {
+var _user$project$FadeAnimation1$isRunning = function (_p2) {
 	var _p3 = _p2;
 	return _p3._0.running;
 };
-var _user$project$FadeAnimation$unzipComposition = function (compositions) {
-	return A3(
-		_elm_lang$core$List$foldl,
-		F2(
-			function (composition, steps) {
-				return _elm_lang$core$List$concat(
-					{
-						ctor: '::',
-						_0: composition,
-						_1: {
-							ctor: '::',
-							_0: steps,
-							_1: {ctor: '[]'}
-						}
-					});
-			}),
-		{ctor: '[]'},
-		compositions);
-};
-var _user$project$FadeAnimation$FadeAnimation = function (a) {
+var _user$project$FadeAnimation1$FadeAnimation = function (a) {
 	return {ctor: 'FadeAnimation', _0: a};
 };
-var _user$project$FadeAnimation$state = function (current) {
-	return _user$project$FadeAnimation$FadeAnimation(
+var _user$project$FadeAnimation1$state = function (current) {
+	return _user$project$FadeAnimation1$FadeAnimation(
 		{
 			steps: {ctor: '[]'},
-			interruption: {ctor: '[]'},
 			motion: current,
 			running: false
 		});
 };
-var _user$project$FadeAnimation$queue = F2(
-	function (compositions, _p4) {
+var _user$project$FadeAnimation1$interrupt = F2(
+	function (step, _p4) {
 		var _p5 = _p4;
-		var _p6 = _p5._0;
-		var steps = _user$project$FadeAnimation$unzipComposition(compositions);
-		return _user$project$FadeAnimation$FadeAnimation(
+		return _user$project$FadeAnimation1$FadeAnimation(
 			_elm_lang$core$Native_Utils.update(
-				_p6,
+				_p5._0,
 				{
-					steps: A2(_elm_lang$core$Basics_ops['++'], _p6.steps, steps),
+					steps: {
+						ctor: '::',
+						_0: step,
+						_1: {ctor: '[]'}
+					},
 					running: true
 				}));
 	});
-var _user$project$FadeAnimation$interrupt = F2(
-	function (compositions, _p7) {
-		var _p8 = _p7;
-		var steps = _user$project$FadeAnimation$unzipComposition(compositions);
-		return _user$project$FadeAnimation$FadeAnimation(
-			_elm_lang$core$Native_Utils.update(
-				_p8._0,
-				{interruption: steps, running: true}));
-	});
-var _user$project$FadeAnimation$Hide = {ctor: 'Hide'};
-var _user$project$FadeAnimation$FadeOut = {ctor: 'FadeOut'};
-var _user$project$FadeAnimation$Show = {ctor: 'Show'};
-var _user$project$FadeAnimation$fadeOut = {
-	ctor: '::',
-	_0: _user$project$FadeAnimation$Show,
-	_1: {
-		ctor: '::',
-		_0: _user$project$FadeAnimation$FadeOut,
-		_1: {
-			ctor: '::',
-			_0: _user$project$FadeAnimation$Hide,
-			_1: {ctor: '[]'}
-		}
+var _user$project$FadeAnimation1$Set = function (a) {
+	return {ctor: 'Set', _0: a};
+};
+var _user$project$FadeAnimation1$set = _user$project$FadeAnimation1$Set;
+var _user$project$FadeAnimation1$Override = function (a) {
+	return {ctor: 'Override', _0: a};
+};
+var _user$project$FadeAnimation1$override = _user$project$FadeAnimation1$Override;
+var _user$project$FadeAnimation1$Hide = {ctor: 'Hide'};
+var _user$project$FadeAnimation1$Show = {ctor: 'Show'};
+var _user$project$FadeAnimation1$startTowards = function (target) {
+	var _p6 = target;
+	switch (_p6.ctor) {
+		case 'FadeIn':
+			return _user$project$FadeAnimation1$Hide;
+		case 'FadeOut':
+			return _user$project$FadeAnimation1$Show;
+		default:
+			return target;
 	}
 };
-var _user$project$FadeAnimation$FadeIn = {ctor: 'FadeIn'};
-var _user$project$FadeAnimation$fadeIn = {
-	ctor: '::',
-	_0: _user$project$FadeAnimation$Hide,
-	_1: {
-		ctor: '::',
-		_0: _user$project$FadeAnimation$FadeIn,
-		_1: {
-			ctor: '::',
-			_0: _user$project$FadeAnimation$Show,
-			_1: {ctor: '[]'}
-		}
-	}
-};
-var _user$project$FadeAnimation$AnimationEnd = {ctor: 'AnimationEnd'};
-var _user$project$FadeAnimation$onAnimationend = function (msg) {
-	return A2(
-		_elm_lang$html$Html_Attributes$map,
-		msg,
-		A2(
-			_elm_lang$html$Html_Events$on,
-			'animationend',
-			_elm_lang$core$Json_Decode$succeed(_user$project$FadeAnimation$AnimationEnd)));
-};
-var _user$project$FadeAnimation$alreadyAnimationEnd = function (tick) {
-	return _elm_lang$core$Native_Utils.eq(tick, _user$project$FadeAnimation$AnimationEnd);
-};
-var _user$project$FadeAnimation$resolveSteps = F4(
-	function (currentMotion, steps, tick, forceResolve) {
-		var _p9 = _elm_lang$core$List$head(steps);
-		if (_p9.ctor === 'Nothing') {
+var _user$project$FadeAnimation1$resolveSteps = F2(
+	function (currentMotion, steps) {
+		var _p7 = steps;
+		if (_p7.ctor === '[]') {
 			return {
-				ctor: '_Tuple3',
+				ctor: '_Tuple2',
 				_0: currentMotion,
-				_1: {ctor: '[]'},
-				_2: {ctor: '[]'}
+				_1: {ctor: '[]'}
 			};
 		} else {
-			var _p10 = _p9._0;
-			return _user$project$FadeAnimation$alreadyAnimationEnd(tick) ? {
-				ctor: '_Tuple3',
-				_0: _p10,
-				_1: {ctor: '[]'},
-				_2: A2(_elm_lang$core$List$drop, 1, steps)
-			} : (forceResolve ? {
-				ctor: '_Tuple3',
-				_0: _p10,
-				_1: {ctor: '[]'},
-				_2: A2(_elm_lang$core$List$drop, 1, steps)
-			} : ((_elm_lang$core$Native_Utils.eq(currentMotion, _user$project$FadeAnimation$Show) || _elm_lang$core$Native_Utils.eq(currentMotion, _user$project$FadeAnimation$Hide)) ? {
-				ctor: '_Tuple3',
-				_0: _p10,
-				_1: {ctor: '[]'},
-				_2: A2(_elm_lang$core$List$drop, 1, steps)
-			} : {
-				ctor: '_Tuple3',
-				_0: currentMotion,
-				_1: {ctor: '[]'},
-				_2: steps
-			}));
-		}
-	});
-var _user$project$FadeAnimation$updateAnimation = F2(
-	function (tick, _p11) {
-		var _p12 = _p11;
-		var _p18 = _p12._0;
-		var _p13 = {
-			ctor: '_Tuple2',
-			_0: _p18.interruption,
-			_1: {ctor: '[]'}
-		};
-		var readyInterruption = _p13._0;
-		var queuedInterruption = _p13._1;
-		var isInterrupt = _elm_lang$core$Native_Utils.cmp(
-			_elm_lang$core$List$length(readyInterruption),
-			0) > 0;
-		var _p14 = isInterrupt ? {ctor: '_Tuple2', _0: readyInterruption, _1: _p18.motion} : {ctor: '_Tuple2', _0: _p18.steps, _1: _p18.motion};
-		var steps = _p14._0;
-		var motion = _p14._1;
-		var _p15 = A4(_user$project$FadeAnimation$resolveSteps, motion, steps, tick, isInterrupt);
-		var revisedMotion = _p15._0;
-		var sentMessages = _p15._1;
-		var revisedSteps = _p15._2;
-		var _p16 = A2(_elm_lang$core$Debug$log, 'revisedSteps', revisedSteps);
-		var _p17 = A2(_elm_lang$core$Debug$log, 'revisedMotion', revisedMotion);
-		return {
-			ctor: '_Tuple2',
-			_0: _user$project$FadeAnimation$FadeAnimation(
-				_elm_lang$core$Native_Utils.update(
-					_p18,
-					{
-						running: !_elm_lang$core$Native_Utils.eq(
-							_elm_lang$core$List$length(revisedSteps),
-							0),
-						steps: revisedSteps,
-						motion: revisedMotion,
-						interruption: queuedInterruption
-					})),
-			_1: _elm_lang$core$Platform_Cmd$none
-		};
-	});
-var _user$project$FadeAnimation$update = F2(
-	function (tick, animation) {
-		return _elm_lang$core$Tuple$first(
-			A2(_user$project$FadeAnimation$updateAnimation, tick, animation));
-	});
-var _user$project$FadeAnimation$Tick = function (a) {
-	return {ctor: 'Tick', _0: a};
-};
-var _user$project$FadeAnimation$subscription = F2(
-	function (msg, states) {
-		return A2(_elm_lang$core$List$any, _user$project$FadeAnimation$isRunning, states) ? A2(
-			_elm_lang$core$Platform_Sub$map,
-			msg,
-			_elm_lang$animation_frame$AnimationFrame$times(_user$project$FadeAnimation$Tick)) : _elm_lang$core$Platform_Sub$none;
-	});
-
-var _user$project$Main$update = F2(
-	function (action, model) {
-		var _p0 = action;
-		switch (_p0.ctor) {
-			case 'FadeIn':
+			var _p10 = _p7._1;
+			var _p8 = _p7._0;
+			if (_p8.ctor === 'Set') {
+				return {ctor: '_Tuple2', _0: _p8._0, _1: _p10};
+			} else {
+				var _p9 = _p8._0;
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: A2(
-								_user$project$FadeAnimation$interrupt,
-								{
-									ctor: '::',
-									_0: _user$project$FadeAnimation$fadeIn,
-									_1: {ctor: '[]'}
-								},
-								model.state)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'FadeOut':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: A2(
-								_user$project$FadeAnimation$queue,
-								{
-									ctor: '::',
-									_0: _user$project$FadeAnimation$fadeOut,
-									_1: {ctor: '[]'}
-								},
-								model.state)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							state: A2(_user$project$FadeAnimation$update, _p0._0, model.state)
-						}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-		}
-	});
-var _user$project$Main$init = {
-	ctor: '_Tuple2',
-	_0: {
-		state: _user$project$FadeAnimation$state(_user$project$FadeAnimation$Show)
-	},
-	_1: _elm_lang$core$Platform_Cmd$none
-};
-var _user$project$Main$Model = function (a) {
-	return {state: a};
-};
-var _user$project$Main$Animate = function (a) {
-	return {ctor: 'Animate', _0: a};
-};
-var _user$project$Main$subscriptions = function (model) {
-	return A2(
-		_user$project$FadeAnimation$subscription,
-		_user$project$Main$Animate,
-		{
-			ctor: '::',
-			_0: model.state,
-			_1: {ctor: '[]'}
-		});
-};
-var _user$project$Main$renderFadeIn = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$style(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'position', _1: 'relative'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'margin', _1: '100px auto'},
+					_0: _user$project$FadeAnimation1$startTowards(_p9),
 					_1: {
 						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'padding', _1: '25px'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'width', _1: '200px'},
-							_1: {
-								ctor: '::',
-								_0: {ctor: '_Tuple2', _0: 'height', _1: '200px'},
-								_1: {
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#268bd2'},
-									_1: {
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
-										_1: {
-											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '1'},
-											_1: {ctor: '[]'}
-										}
-									}
-								}
-							}
-						}
+						_0: _user$project$FadeAnimation1$Set(_p9),
+						_1: _p10
 					}
-				}
-			}),
-		_1: {
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('container fadeIn'),
-			_1: {
-				ctor: '::',
-				_0: _user$project$FadeAnimation$onAnimationend(_user$project$Main$Animate),
-				_1: {ctor: '[]'}
+				};
 			}
 		}
-	},
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html$text('Fade animation container'),
-		_1: {ctor: '[]'}
 	});
-var _user$project$Main$renderShow = A2(
+var _user$project$FadeAnimation1$update = F2(
+	function (tick, _p11) {
+		var _p12 = _p11;
+		var _p14 = _p12._0.steps;
+		var _p13 = A2(_user$project$FadeAnimation1$resolveSteps, _p12._0.motion, _p14);
+		var revisedMotion = _p13._0;
+		var revisedSteps = _p13._1;
+		return _user$project$FadeAnimation1$FadeAnimation(
+			_elm_lang$core$Native_Utils.update(
+				_p12._0,
+				{
+					steps: revisedSteps,
+					motion: revisedMotion,
+					running: _elm_lang$core$Native_Utils.cmp(
+						_elm_lang$core$List$length(_p14),
+						0) > 0
+				}));
+	});
+var _user$project$FadeAnimation1$FadeOut = {ctor: 'FadeOut'};
+var _user$project$FadeAnimation1$FadeIn = {ctor: 'FadeIn'};
+var _user$project$FadeAnimation1$OneFrame = function (a) {
+	return {ctor: 'OneFrame', _0: a};
+};
+var _user$project$FadeAnimation1$subscription = F2(
+	function (msg, states) {
+		return A2(_elm_lang$core$List$any, _user$project$FadeAnimation1$isRunning, states) ? A2(
+			_elm_lang$core$Platform_Sub$map,
+			msg,
+			_elm_lang$animation_frame$AnimationFrame$times(_user$project$FadeAnimation1$OneFrame)) : _elm_lang$core$Platform_Sub$none;
+	});
+var _user$project$FadeAnimation1$Tick = {ctor: 'Tick'};
+
+var _user$project$Main$renderHide = A2(
 	_elm_lang$html$Html$div,
 	{
 		ctor: '::',
@@ -9189,7 +8984,7 @@ var _user$project$Main$renderShow = A2(
 										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
 										_1: {
 											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '1'},
+											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '0'},
 											_1: {ctor: '[]'}
 										}
 									}
@@ -9202,11 +8997,7 @@ var _user$project$Main$renderShow = A2(
 		_1: {
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$class('container'),
-			_1: {
-				ctor: '::',
-				_0: _user$project$FadeAnimation$onAnimationend(_user$project$Main$Animate),
-				_1: {ctor: '[]'}
-			}
+			_1: {ctor: '[]'}
 		}
 	},
 	{
@@ -9255,11 +9046,7 @@ var _user$project$Main$renderFadeOut = A2(
 		_1: {
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$class('container fadeOut'),
-			_1: {
-				ctor: '::',
-				_0: _user$project$FadeAnimation$onAnimationend(_user$project$Main$Animate),
-				_1: {ctor: '[]'}
-			}
+			_1: {ctor: '[]'}
 		}
 	},
 	{
@@ -9267,7 +9054,7 @@ var _user$project$Main$renderFadeOut = A2(
 		_0: _elm_lang$html$Html$text('Fade animation container'),
 		_1: {ctor: '[]'}
 	});
-var _user$project$Main$renderHide = A2(
+var _user$project$Main$renderShow = A2(
 	_elm_lang$html$Html$div,
 	{
 		ctor: '::',
@@ -9295,7 +9082,7 @@ var _user$project$Main$renderHide = A2(
 										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
 										_1: {
 											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '0'},
+											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '1'},
 											_1: {ctor: '[]'}
 										}
 									}
@@ -9308,11 +9095,56 @@ var _user$project$Main$renderHide = A2(
 		_1: {
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$class('container'),
-			_1: {
+			_1: {ctor: '[]'}
+		}
+	},
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html$text('Fade animation container'),
+		_1: {ctor: '[]'}
+	});
+var _user$project$Main$renderFadeIn = A2(
+	_elm_lang$html$Html$div,
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$style(
+			{
 				ctor: '::',
-				_0: _user$project$FadeAnimation$onAnimationend(_user$project$Main$Animate),
-				_1: {ctor: '[]'}
-			}
+				_0: {ctor: '_Tuple2', _0: 'position', _1: 'relative'},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'margin', _1: '100px auto'},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'padding', _1: '25px'},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'width', _1: '200px'},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'height', _1: '200px'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#268bd2'},
+									_1: {
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
+										_1: {
+											ctor: '::',
+											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '1'},
+											_1: {ctor: '[]'}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}),
+		_1: {
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('container fadeIn'),
+			_1: {ctor: '[]'}
 		}
 	},
 	{
@@ -9321,9 +9153,9 @@ var _user$project$Main$renderHide = A2(
 		_1: {ctor: '[]'}
 	});
 var _user$project$Main$renderFadeContainer = function (model) {
-	var keyFrame = _user$project$FadeAnimation$render(model.state);
-	var _p1 = keyFrame;
-	switch (_p1.ctor) {
+	var keyFrame = _user$project$FadeAnimation1$render(model.state);
+	var _p0 = keyFrame;
+	switch (_p0.ctor) {
 		case 'FadeIn':
 			return _user$project$Main$renderFadeIn;
 		case 'Show':
@@ -9333,6 +9165,71 @@ var _user$project$Main$renderFadeContainer = function (model) {
 		default:
 			return _user$project$Main$renderFadeOut;
 	}
+};
+var _user$project$Main$update = F2(
+	function (action, model) {
+		var _p1 = action;
+		switch (_p1.ctor) {
+			case 'FadeIn':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							state: A2(
+								_user$project$FadeAnimation1$interrupt,
+								_user$project$FadeAnimation1$override(_user$project$FadeAnimation1$FadeIn),
+								model.state)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'FadeOut':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							state: A2(
+								_user$project$FadeAnimation1$interrupt,
+								_user$project$FadeAnimation1$override(_user$project$FadeAnimation1$FadeOut),
+								model.state)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							state: A2(_user$project$FadeAnimation1$update, _p1._0, model.state)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _user$project$Main$init = {
+	ctor: '_Tuple2',
+	_0: {
+		state: _user$project$FadeAnimation1$state(_user$project$FadeAnimation1$Show)
+	},
+	_1: _elm_lang$core$Platform_Cmd$none
+};
+var _user$project$Main$Model = function (a) {
+	return {state: a};
+};
+var _user$project$Main$Animate = function (a) {
+	return {ctor: 'Animate', _0: a};
+};
+var _user$project$Main$subscriptions = function (model) {
+	return A2(
+		_user$project$FadeAnimation1$subscription,
+		_user$project$Main$Animate,
+		{
+			ctor: '::',
+			_0: model.state,
+			_1: {ctor: '[]'}
+		});
 };
 var _user$project$Main$FadeOut = {ctor: 'FadeOut'};
 var _user$project$Main$FadeIn = {ctor: 'FadeIn'};

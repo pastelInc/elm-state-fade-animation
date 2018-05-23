@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import FadeAnimation
+import FadeAnimation1 as FadeAnimation
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -48,8 +48,7 @@ update action model =
             ( { model
                 | state =
                     FadeAnimation.interrupt
-                        [ FadeAnimation.fadeIn
-                        ]
+                        (FadeAnimation.override FadeAnimation.FadeIn)
                         model.state
               }
             , Cmd.none
@@ -58,9 +57,8 @@ update action model =
         FadeOut ->
             ( { model
                 | state =
-                    FadeAnimation.queue
-                        [ FadeAnimation.fadeOut
-                        ]
+                    FadeAnimation.interrupt
+                        (FadeAnimation.override FadeAnimation.FadeOut)
                         model.state
               }
             , Cmd.none
@@ -129,7 +127,6 @@ renderFadeIn =
             , ( "opacity", "1" )
             ]
         , class "container fadeIn"
-        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]
 
@@ -148,7 +145,6 @@ renderShow =
             , ( "opacity", "1" )
             ]
         , class "container"
-        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]
 
@@ -167,7 +163,6 @@ renderFadeOut =
             , ( "opacity", "0" )
             ]
         , class "container fadeOut"
-        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]
 
@@ -186,6 +181,5 @@ renderHide =
             , ( "opacity", "0" )
             ]
         , class "container"
-        , FadeAnimation.onAnimationend <| Animate
         ]
         [ text "Fade animation container" ]
