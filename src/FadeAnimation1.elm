@@ -8,12 +8,12 @@ module FadeAnimation1
         , render
         , set
         , state
-        , subscription
         , update
         )
 
-import AnimationFrame
-import Time exposing (Time)
+import Process
+import Task
+import Time exposing (Time, millisecond)
 
 
 -- 1フレーム単位の割り込みを行いたい
@@ -24,7 +24,6 @@ type FadeAnimation
     = FadeAnimation
         { steps : List Step
         , motion : Motion
-        , running : Bool
         }
 
 
@@ -46,7 +45,7 @@ type alias Msg =
 
 type Tick
     = Tick
-    | OneFrame Time
+    | AnimationEnd
 
 
 state : Motion -> FadeAnimation
@@ -54,7 +53,6 @@ state current =
     FadeAnimation
         { steps = []
         , motion = current
-        , running = False
         }
 
 
@@ -68,51 +66,42 @@ set =
     Set
 
 
-interrupt : Step -> FadeAnimation -> FadeAnimation
+interrupt : Step -> FadeAnimation -> ( FadeAnimation, Cmd Msg )
 interrupt step (FadeAnimation model) =
-    FadeAnimation
-        { model
-            | steps = [ step ]
-            , running = True
-        }
+    update Tick <|
+        FadeAnimation
+            { model
+                | steps = [ step ]
+            }
 
 
-{-| Create a subscription to AnimationFrame.times.
-
-It is throttled based on whether the current animation is running or not.
-キューの中身がなくなるまでsubscribeし続けるが、要調整。
-
--}
-subscription : (Msg -> msgB) -> List FadeAnimation -> Sub msgB
-subscription msg states =
-    if List.any isRunning states then
-        Sub.map msg (AnimationFrame.times OneFrame)
-    else
-        Sub.none
+after : Float -> Time -> msg -> Cmd msg
+after time unit msg =
+    Process.sleep (time * unit) |> Task.perform (always msg)
 
 
-
--- Queueの残りがあればkickする
-
-
-isRunning : FadeAnimation -> Bool
-isRunning (FadeAnimation model) =
-    model.running
-
-
-update : Msg -> FadeAnimation -> FadeAnimation
+update : Msg -> FadeAnimation -> ( FadeAnimation, Cmd Msg )
 update tick (FadeAnimation ({ steps, motion } as model)) =
     let
         ( revisedMotion, revisedSteps ) =
             resolveSteps motion steps
     in
-    FadeAnimation
+    ( FadeAnimation
         { model
             | steps = revisedSteps
             , motion = revisedMotion
-            , running =
-                List.length steps > 0
         }
+    , if isPause revisedMotion then
+        -- NOTE: 16.666ms = 1 frame
+        after 16.666 millisecond Tick
+      else
+        Cmd.none
+    )
+
+
+isPause : Motion -> Bool
+isPause target =
+    target == Show || target == Hide
 
 
 resolveSteps : Motion -> List Step -> ( Motion, List Step )

@@ -32,7 +32,7 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    FadeAnimation.subscription Animate [ model.state ]
+    Sub.none
 
 
 type Msg
@@ -45,30 +45,40 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
         FadeIn ->
-            ( { model
-                | state =
+            let
+                ( newState, cmds ) =
                     FadeAnimation.interrupt
                         (FadeAnimation.override FadeAnimation.FadeIn)
                         model.state
+            in
+            ( { model
+                | state = newState
               }
-            , Cmd.none
+            , Cmd.map Animate cmds
             )
 
         FadeOut ->
-            ( { model
-                | state =
+            let
+                ( newState, cmds ) =
                     FadeAnimation.interrupt
                         (FadeAnimation.override FadeAnimation.FadeOut)
                         model.state
+            in
+            ( { model
+                | state = newState
               }
-            , Cmd.none
+            , Cmd.map Animate cmds
             )
 
         Animate animMsg ->
+            let
+                ( newState, cmds ) =
+                    FadeAnimation.update animMsg model.state
+            in
             ( { model
-                | state = FadeAnimation.update animMsg model.state
+                | state = newState
               }
-            , Cmd.none
+            , Cmd.map Animate cmds
             )
 
 
