@@ -1,126 +1,122 @@
 module FadeAnimation
     exposing
         ( FadeAnimation
-        , Motion(..)
         , Msg
+        , State(..)
         , fadeIn
         , fadeOut
+        , hide
         , interrupt
-        , onAnimationend
-        , queue
         , render
+        , show
+        , spring
         , state
         , subscription
         , update
         )
 
 import AnimationFrame
-import Html exposing (Html)
-import Html.Attributes
-import Html.Events
-import Json.Decode
 import Time exposing (Time)
-import Tuple
 
 
 type FadeAnimation
     = FadeAnimation
-        { steps : List Motion
-        , interruption : List Motion
-        , motion : Motion
+        { steps : List Step
+        , state : State
+        , timing : Timing
         , running : Bool
         }
 
 
-type Motion
+type alias Timing =
+    { current : Time
+    , dt : Time
+    }
+
+
+type Spring
+    = Spring
+        { from : Step
+        , to : Step
+        }
+
+
+type State
     = FadeIn
-    | Show
     | FadeOut
     | Hide
+    | Show
 
 
-type alias Composition =
-    List Motion
-
-
-fadeIn : Composition
-fadeIn =
-    [ Hide
-    , FadeIn
-    , Show
-    ]
-
-
-fadeOut : Composition
-fadeOut =
-    [ Show
-    , FadeOut
-    , Hide
-    ]
-
-
-type alias Msg =
-    Tick
-
-
-type Tick
+type Msg
     = Tick Time
-    | AnimationEnd
 
 
-unzipComposition : List Composition -> List Motion
-unzipComposition compositions =
-    List.foldl (\composition steps -> List.concat [ composition, steps ]) [] compositions
+type alias Step =
+    { state : State
+    , dt : Time
+    }
 
 
-state : Motion -> FadeAnimation
+state : State -> FadeAnimation
 state current =
     FadeAnimation
         { steps = []
-        , interruption = []
-        , motion = current
+        , state = current
+        , timing =
+            { current = 0
+            , dt = 0
+            }
         , running = False
         }
 
 
-queue : List Composition -> FadeAnimation -> FadeAnimation
-queue compositions (FadeAnimation model) =
-    let
-        steps =
-            unzipComposition compositions
-    in
+fadeIn : Time -> Step
+fadeIn dt =
+    { state = FadeIn
+    , dt = dt
+    }
+
+
+fadeOut : Time -> Step
+fadeOut dt =
+    { state = FadeOut
+    , dt = dt
+    }
+
+
+hide : Step
+hide =
+    { state = Hide
+    , dt = 0
+    }
+
+
+show : Step
+show =
+    { state = Show
+    , dt = 0
+    }
+
+
+spring : Step -> Step -> Spring
+spring from to =
+    Spring
+        { from = from
+        , to = to
+        }
+
+
+interrupt : Spring -> FadeAnimation -> FadeAnimation
+interrupt (Spring { from, to }) (FadeAnimation model) =
     FadeAnimation
         { model
-            | steps = model.steps ++ steps
+            | steps = [ from, to ]
             , running = True
         }
 
 
-interrupt : List Composition -> FadeAnimation -> FadeAnimation
-interrupt compositions (FadeAnimation model) =
-    let
-        steps =
-            unzipComposition compositions
-    in
-    FadeAnimation
-        { model
-            | interruption = steps
-            , running = True
-        }
-
-
-onAnimationend : (Msg -> msgB) -> Html.Attribute msgB
-onAnimationend msg =
-    Html.Attributes.map msg <|
-        Html.Events.on "animationend" (Json.Decode.succeed AnimationEnd)
-
-
-{-| Create a subscription to AnimationFrame.times.
-
-It is throttled based on whether the current animation is running or not.
-
--}
-subscription : (Msg -> msgB) -> List FadeAnimation -> Sub msgB
+subscription : (Msg -> msg) -> List FadeAnimation -> Sub msg
 subscription msg states =
     if List.any isRunning states then
         Sub.map msg (AnimationFrame.times Tick)
@@ -134,78 +130,64 @@ isRunning (FadeAnimation model) =
 
 
 update : Msg -> FadeAnimation -> FadeAnimation
-update tick animation =
-    Tuple.first <| updateAnimation tick animation
-
-
-updateAnimation : Tick -> FadeAnimation -> ( FadeAnimation, Cmd msg )
-updateAnimation tick (FadeAnimation model) =
+update (Tick now) (FadeAnimation ({ steps, state } as model)) =
     let
-        ( readyInterruption, queuedInterruption ) =
-            ( model.interruption, [] )
+        -- set current and dt time
+        timing =
+            refreshTiming now model.timing
 
-        isInterrupt =
-            List.length readyInterruption > 0
-
-        ( steps, motion ) =
-            if isInterrupt then
-                ( readyInterruption, model.motion )
-            else
-                ( model.steps, model.motion )
-
-        ( revisedMotion, sentMessages, revisedSteps ) =
-            resolveSteps motion steps tick isInterrupt
-
-        _ =
-            Debug.log "revisedSteps" revisedSteps
-
-        _ =
-            Debug.log "revisedMotion" revisedMotion
+        ( revisedState, revisedSteps ) =
+            resolveSteps state steps timing.dt
     in
-    ( FadeAnimation
+    FadeAnimation
         { model
-            | running =
-                List.length revisedSteps
-                    /= 0
-            , steps = revisedSteps
-            , motion = revisedMotion
-            , interruption = queuedInterruption
+            | steps = revisedSteps
+            , state = revisedState
+            , timing = timing
+            , running =
+                List.length revisedSteps /= 0
         }
-    , Cmd.none
-    )
 
 
-resolveSteps : Motion -> List Motion -> Tick -> Bool -> ( Motion, List msg, List Motion )
-resolveSteps currentMotion steps tick forceResolve =
-    case List.head steps of
-        Nothing ->
-            ( currentMotion, [], [] )
+refreshTiming : Time -> Timing -> Timing
+refreshTiming now timing =
+    let
+        dt =
+            now - timing.current
 
-        Just target ->
-            if alreadyAnimationEnd tick then
-                ( target
-                , []
-                , List.drop 1 steps
-                )
-            else if forceResolve then
-                ( target
-                , []
-                , List.drop 1 steps
-                )
-            else if (currentMotion == Show) || (currentMotion == Hide) then
-                ( target
-                , []
-                , List.drop 1 steps
+        -- dt is set to one frame (16.66) if it is a large dt(more than 2 frames),
+        -- A large dt means one of the following:
+        --    * the user left the browser window and came back
+        --    * the animation subscription has stopped calling for updates for a while and started running again
+        --
+        -- We also have a special case when timing.current == 0, which is happens at startup.
+    in
+    { current = now
+    , dt =
+        if dt > 34 || timing.current == 0 then
+            16.666
+        else
+            dt
+    }
+
+
+resolveSteps : State -> List Step -> Time -> ( State, List Step )
+resolveSteps currentState steps n =
+    case steps of
+        [] ->
+            ( currentState, [] )
+
+        { state, dt } :: queuedSteps ->
+            if dt <= 0 then
+                ( state
+                , queuedSteps
                 )
             else
-                ( currentMotion, [], steps )
+                ( state
+                , { state = state, dt = dt - n } :: queuedSteps
+                )
 
 
-alreadyAnimationEnd : Tick -> Bool
-alreadyAnimationEnd tick =
-    tick == AnimationEnd
-
-
-render : FadeAnimation -> Motion
+render : FadeAnimation -> State
 render (FadeAnimation model) =
-    model.motion
+    model.state

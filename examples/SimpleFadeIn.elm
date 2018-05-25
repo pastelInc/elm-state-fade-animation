@@ -1,9 +1,10 @@
 module Main exposing (..)
 
-import FadeAnimation1 as FadeAnimation
+import FadeAnimation
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Time exposing (Time, second)
 
 
 main : Program Never Model Msg
@@ -32,7 +33,7 @@ init =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    FadeAnimation.subscription Animate [ model.state ]
 
 
 type Msg
@@ -46,39 +47,45 @@ update action model =
     case action of
         FadeIn ->
             let
-                ( newState, cmds ) =
+                newState =
                     FadeAnimation.interrupt
-                        (FadeAnimation.override FadeAnimation.FadeIn)
+                        (FadeAnimation.spring
+                            FadeAnimation.hide
+                            (FadeAnimation.fadeIn (5 * second))
+                        )
                         model.state
             in
             ( { model
                 | state = newState
               }
-            , Cmd.map Animate cmds
+            , Cmd.none
             )
 
         FadeOut ->
             let
-                ( newState, cmds ) =
+                newState =
                     FadeAnimation.interrupt
-                        (FadeAnimation.override FadeAnimation.FadeOut)
+                        (FadeAnimation.spring
+                            FadeAnimation.show
+                            (FadeAnimation.fadeOut (2 * second))
+                        )
                         model.state
             in
             ( { model
                 | state = newState
               }
-            , Cmd.map Animate cmds
+            , Cmd.none
             )
 
         Animate animMsg ->
             let
-                ( newState, cmds ) =
+                newState =
                     FadeAnimation.update animMsg model.state
             in
             ( { model
                 | state = newState
               }
-            , Cmd.map Animate cmds
+            , Cmd.none
             )
 
 
@@ -105,11 +112,11 @@ view model =
 renderFadeContainer : Model -> Html Msg
 renderFadeContainer model =
     let
-        keyFrame =
+        state =
             FadeAnimation.render
                 model.state
     in
-    case keyFrame of
+    case state of
         FadeAnimation.FadeIn ->
             renderFadeIn
 

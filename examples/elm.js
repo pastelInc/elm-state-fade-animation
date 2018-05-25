@@ -135,6 +135,29 @@ function A9(fun, a, b, c, d, e, f, g, h, i)
     : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 }
 
+var _elm_lang$animation_frame$Native_AnimationFrame = function()
+{
+
+function create()
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		var id = requestAnimationFrame(function() {
+			callback(_elm_lang$core$Native_Scheduler.succeed(Date.now()));
+		});
+
+		return function() {
+			cancelAnimationFrame(id);
+		};
+	});
+}
+
+return {
+	create: create
+};
+
+}();
+
 //import Native.Utils //
 
 var _elm_lang$core$Native_Basics = function() {
@@ -4501,6 +4524,148 @@ var _elm_lang$core$Tuple$first = function (_p6) {
 	return _p7._0;
 };
 
+var _elm_lang$animation_frame$AnimationFrame$rAF = _elm_lang$animation_frame$Native_AnimationFrame.create(
+	{ctor: '_Tuple0'});
+var _elm_lang$animation_frame$AnimationFrame$subscription = _elm_lang$core$Native_Platform.leaf('AnimationFrame');
+var _elm_lang$animation_frame$AnimationFrame$State = F3(
+	function (a, b, c) {
+		return {subs: a, request: b, oldTime: c};
+	});
+var _elm_lang$animation_frame$AnimationFrame$init = _elm_lang$core$Task$succeed(
+	A3(
+		_elm_lang$animation_frame$AnimationFrame$State,
+		{ctor: '[]'},
+		_elm_lang$core$Maybe$Nothing,
+		0));
+var _elm_lang$animation_frame$AnimationFrame$onEffects = F3(
+	function (router, subs, _p0) {
+		var _p1 = _p0;
+		var _p5 = _p1.request;
+		var _p4 = _p1.oldTime;
+		var _p2 = {ctor: '_Tuple2', _0: _p5, _1: subs};
+		if (_p2._0.ctor === 'Nothing') {
+			if (_p2._1.ctor === '[]') {
+				return _elm_lang$core$Task$succeed(
+					A3(
+						_elm_lang$animation_frame$AnimationFrame$State,
+						{ctor: '[]'},
+						_elm_lang$core$Maybe$Nothing,
+						_p4));
+			} else {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (pid) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							function (time) {
+								return _elm_lang$core$Task$succeed(
+									A3(
+										_elm_lang$animation_frame$AnimationFrame$State,
+										subs,
+										_elm_lang$core$Maybe$Just(pid),
+										time));
+							},
+							_elm_lang$core$Time$now);
+					},
+					_elm_lang$core$Process$spawn(
+						A2(
+							_elm_lang$core$Task$andThen,
+							_elm_lang$core$Platform$sendToSelf(router),
+							_elm_lang$animation_frame$AnimationFrame$rAF)));
+			}
+		} else {
+			if (_p2._1.ctor === '[]') {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (_p3) {
+						return _elm_lang$core$Task$succeed(
+							A3(
+								_elm_lang$animation_frame$AnimationFrame$State,
+								{ctor: '[]'},
+								_elm_lang$core$Maybe$Nothing,
+								_p4));
+					},
+					_elm_lang$core$Process$kill(_p2._0._0));
+			} else {
+				return _elm_lang$core$Task$succeed(
+					A3(_elm_lang$animation_frame$AnimationFrame$State, subs, _p5, _p4));
+			}
+		}
+	});
+var _elm_lang$animation_frame$AnimationFrame$onSelfMsg = F3(
+	function (router, newTime, _p6) {
+		var _p7 = _p6;
+		var _p10 = _p7.subs;
+		var diff = newTime - _p7.oldTime;
+		var send = function (sub) {
+			var _p8 = sub;
+			if (_p8.ctor === 'Time') {
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					_p8._0(newTime));
+			} else {
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					_p8._0(diff));
+			}
+		};
+		return A2(
+			_elm_lang$core$Task$andThen,
+			function (pid) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					function (_p9) {
+						return _elm_lang$core$Task$succeed(
+							A3(
+								_elm_lang$animation_frame$AnimationFrame$State,
+								_p10,
+								_elm_lang$core$Maybe$Just(pid),
+								newTime));
+					},
+					_elm_lang$core$Task$sequence(
+						A2(_elm_lang$core$List$map, send, _p10)));
+			},
+			_elm_lang$core$Process$spawn(
+				A2(
+					_elm_lang$core$Task$andThen,
+					_elm_lang$core$Platform$sendToSelf(router),
+					_elm_lang$animation_frame$AnimationFrame$rAF)));
+	});
+var _elm_lang$animation_frame$AnimationFrame$Diff = function (a) {
+	return {ctor: 'Diff', _0: a};
+};
+var _elm_lang$animation_frame$AnimationFrame$diffs = function (tagger) {
+	return _elm_lang$animation_frame$AnimationFrame$subscription(
+		_elm_lang$animation_frame$AnimationFrame$Diff(tagger));
+};
+var _elm_lang$animation_frame$AnimationFrame$Time = function (a) {
+	return {ctor: 'Time', _0: a};
+};
+var _elm_lang$animation_frame$AnimationFrame$times = function (tagger) {
+	return _elm_lang$animation_frame$AnimationFrame$subscription(
+		_elm_lang$animation_frame$AnimationFrame$Time(tagger));
+};
+var _elm_lang$animation_frame$AnimationFrame$subMap = F2(
+	function (func, sub) {
+		var _p11 = sub;
+		if (_p11.ctor === 'Time') {
+			return _elm_lang$animation_frame$AnimationFrame$Time(
+				function (_p12) {
+					return func(
+						_p11._0(_p12));
+				});
+		} else {
+			return _elm_lang$animation_frame$AnimationFrame$Diff(
+				function (_p13) {
+					return func(
+						_p11._0(_p13));
+				});
+		}
+	});
+_elm_lang$core$Native_Platform.effectManagers['AnimationFrame'] = {pkg: 'elm-lang/animation-frame', init: _elm_lang$animation_frame$AnimationFrame$init, onEffects: _elm_lang$animation_frame$AnimationFrame$onEffects, onSelfMsg: _elm_lang$animation_frame$AnimationFrame$onSelfMsg, tag: 'sub', subMap: _elm_lang$animation_frame$AnimationFrame$subMap};
+
 //import Native.List //
 
 var _elm_lang$core$Native_Array = function() {
@@ -8676,114 +8841,136 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _user$project$FadeAnimation1$render = function (_p0) {
+var _user$project$FadeAnimation$render = function (_p0) {
 	var _p1 = _p0;
-	return _p1._0.motion;
+	return _p1._0.state;
 };
-var _user$project$FadeAnimation1$after = F3(
-	function (time, unit, msg) {
-		return A2(
-			_elm_lang$core$Task$perform,
-			_elm_lang$core$Basics$always(msg),
-			_elm_lang$core$Process$sleep(time * unit));
-	});
-var _user$project$FadeAnimation1$FadeAnimation = function (a) {
-	return {ctor: 'FadeAnimation', _0: a};
-};
-var _user$project$FadeAnimation1$state = function (current) {
-	return _user$project$FadeAnimation1$FadeAnimation(
-		{
-			steps: {ctor: '[]'},
-			motion: current
-		});
-};
-var _user$project$FadeAnimation1$Set = function (a) {
-	return {ctor: 'Set', _0: a};
-};
-var _user$project$FadeAnimation1$set = _user$project$FadeAnimation1$Set;
-var _user$project$FadeAnimation1$Override = function (a) {
-	return {ctor: 'Override', _0: a};
-};
-var _user$project$FadeAnimation1$override = _user$project$FadeAnimation1$Override;
-var _user$project$FadeAnimation1$Hide = {ctor: 'Hide'};
-var _user$project$FadeAnimation1$Show = {ctor: 'Show'};
-var _user$project$FadeAnimation1$isPause = function (target) {
-	return _elm_lang$core$Native_Utils.eq(target, _user$project$FadeAnimation1$Show) || _elm_lang$core$Native_Utils.eq(target, _user$project$FadeAnimation1$Hide);
-};
-var _user$project$FadeAnimation1$startTowards = function (target) {
-	var _p2 = target;
-	switch (_p2.ctor) {
-		case 'FadeIn':
-			return _user$project$FadeAnimation1$Hide;
-		case 'FadeOut':
-			return _user$project$FadeAnimation1$Show;
-		default:
-			return target;
-	}
-};
-var _user$project$FadeAnimation1$resolveSteps = F2(
-	function (currentMotion, steps) {
-		var _p3 = steps;
-		if (_p3.ctor === '[]') {
+var _user$project$FadeAnimation$resolveSteps = F3(
+	function (currentState, steps, n) {
+		var _p2 = steps;
+		if (_p2.ctor === '[]') {
 			return {
 				ctor: '_Tuple2',
-				_0: currentMotion,
+				_0: currentState,
 				_1: {ctor: '[]'}
 			};
 		} else {
-			var _p6 = _p3._1;
-			var _p4 = _p3._0;
-			if (_p4.ctor === 'Set') {
-				return {ctor: '_Tuple2', _0: _p4._0, _1: _p6};
-			} else {
-				var _p5 = _p4._0;
-				return {
-					ctor: '_Tuple2',
-					_0: _user$project$FadeAnimation1$startTowards(_p5),
-					_1: {
-						ctor: '::',
-						_0: _user$project$FadeAnimation1$Set(_p5),
-						_1: _p6
-					}
-				};
-			}
+			var _p5 = _p2._0.state;
+			var _p4 = _p2._1;
+			var _p3 = _p2._0.dt;
+			return (_elm_lang$core$Native_Utils.cmp(_p3, 0) < 1) ? {ctor: '_Tuple2', _0: _p5, _1: _p4} : {
+				ctor: '_Tuple2',
+				_0: _p5,
+				_1: {
+					ctor: '::',
+					_0: {state: _p5, dt: _p3 - n},
+					_1: _p4
+				}
+			};
 		}
 	});
-var _user$project$FadeAnimation1$FadeOut = {ctor: 'FadeOut'};
-var _user$project$FadeAnimation1$FadeIn = {ctor: 'FadeIn'};
-var _user$project$FadeAnimation1$AnimationEnd = {ctor: 'AnimationEnd'};
-var _user$project$FadeAnimation1$Tick = {ctor: 'Tick'};
-var _user$project$FadeAnimation1$update = F2(
-	function (tick, _p7) {
-		var _p8 = _p7;
-		var _p9 = A2(_user$project$FadeAnimation1$resolveSteps, _p8._0.motion, _p8._0.steps);
-		var revisedMotion = _p9._0;
-		var revisedSteps = _p9._1;
+var _user$project$FadeAnimation$refreshTiming = F2(
+	function (now, timing) {
+		var dt = now - timing.current;
 		return {
-			ctor: '_Tuple2',
-			_0: _user$project$FadeAnimation1$FadeAnimation(
-				_elm_lang$core$Native_Utils.update(
-					_p8._0,
-					{steps: revisedSteps, motion: revisedMotion})),
-			_1: _user$project$FadeAnimation1$isPause(revisedMotion) ? A3(_user$project$FadeAnimation1$after, 16.666, _elm_lang$core$Time$millisecond, _user$project$FadeAnimation1$Tick) : _elm_lang$core$Platform_Cmd$none
+			current: now,
+			dt: ((_elm_lang$core$Native_Utils.cmp(dt, 34) > 0) || _elm_lang$core$Native_Utils.eq(timing.current, 0)) ? 16.666 : dt
 		};
 	});
-var _user$project$FadeAnimation1$interrupt = F2(
-	function (step, _p10) {
-		var _p11 = _p10;
-		return A2(
-			_user$project$FadeAnimation1$update,
-			_user$project$FadeAnimation1$Tick,
-			_user$project$FadeAnimation1$FadeAnimation(
-				_elm_lang$core$Native_Utils.update(
-					_p11._0,
-					{
-						steps: {
+var _user$project$FadeAnimation$isRunning = function (_p6) {
+	var _p7 = _p6;
+	return _p7._0.running;
+};
+var _user$project$FadeAnimation$Timing = F2(
+	function (a, b) {
+		return {current: a, dt: b};
+	});
+var _user$project$FadeAnimation$Step = F2(
+	function (a, b) {
+		return {state: a, dt: b};
+	});
+var _user$project$FadeAnimation$FadeAnimation = function (a) {
+	return {ctor: 'FadeAnimation', _0: a};
+};
+var _user$project$FadeAnimation$state = function (current) {
+	return _user$project$FadeAnimation$FadeAnimation(
+		{
+			steps: {ctor: '[]'},
+			state: current,
+			timing: {current: 0, dt: 0},
+			running: false
+		});
+};
+var _user$project$FadeAnimation$interrupt = F2(
+	function (_p9, _p8) {
+		var _p10 = _p9;
+		var _p11 = _p8;
+		return _user$project$FadeAnimation$FadeAnimation(
+			_elm_lang$core$Native_Utils.update(
+				_p11._0,
+				{
+					steps: {
+						ctor: '::',
+						_0: _p10._0.from,
+						_1: {
 							ctor: '::',
-							_0: step,
+							_0: _p10._0.to,
 							_1: {ctor: '[]'}
 						}
-					})));
+					},
+					running: true
+				}));
+	});
+var _user$project$FadeAnimation$update = F2(
+	function (_p13, _p12) {
+		var _p14 = _p13;
+		var _p15 = _p12;
+		var _p17 = _p15._0;
+		var timing = A2(_user$project$FadeAnimation$refreshTiming, _p14._0, _p17.timing);
+		var _p16 = A3(_user$project$FadeAnimation$resolveSteps, _p15._0.state, _p15._0.steps, timing.dt);
+		var revisedState = _p16._0;
+		var revisedSteps = _p16._1;
+		return _user$project$FadeAnimation$FadeAnimation(
+			_elm_lang$core$Native_Utils.update(
+				_p17,
+				{
+					steps: revisedSteps,
+					state: revisedState,
+					timing: timing,
+					running: !_elm_lang$core$Native_Utils.eq(
+						_elm_lang$core$List$length(revisedSteps),
+						0)
+				}));
+	});
+var _user$project$FadeAnimation$Spring = function (a) {
+	return {ctor: 'Spring', _0: a};
+};
+var _user$project$FadeAnimation$spring = F2(
+	function (from, to) {
+		return _user$project$FadeAnimation$Spring(
+			{from: from, to: to});
+	});
+var _user$project$FadeAnimation$Show = {ctor: 'Show'};
+var _user$project$FadeAnimation$show = {state: _user$project$FadeAnimation$Show, dt: 0};
+var _user$project$FadeAnimation$Hide = {ctor: 'Hide'};
+var _user$project$FadeAnimation$hide = {state: _user$project$FadeAnimation$Hide, dt: 0};
+var _user$project$FadeAnimation$FadeOut = {ctor: 'FadeOut'};
+var _user$project$FadeAnimation$fadeOut = function (dt) {
+	return {state: _user$project$FadeAnimation$FadeOut, dt: dt};
+};
+var _user$project$FadeAnimation$FadeIn = {ctor: 'FadeIn'};
+var _user$project$FadeAnimation$fadeIn = function (dt) {
+	return {state: _user$project$FadeAnimation$FadeIn, dt: dt};
+};
+var _user$project$FadeAnimation$Tick = function (a) {
+	return {ctor: 'Tick', _0: a};
+};
+var _user$project$FadeAnimation$subscription = F2(
+	function (msg, states) {
+		return A2(_elm_lang$core$List$any, _user$project$FadeAnimation$isRunning, states) ? A2(
+			_elm_lang$core$Platform_Sub$map,
+			msg,
+			_elm_lang$animation_frame$AnimationFrame$times(_user$project$FadeAnimation$Tick)) : _elm_lang$core$Platform_Sub$none;
 	});
 
 var _user$project$Main$renderHide = A2(
@@ -8983,8 +9170,8 @@ var _user$project$Main$renderFadeIn = A2(
 		_1: {ctor: '[]'}
 	});
 var _user$project$Main$renderFadeContainer = function (model) {
-	var keyFrame = _user$project$FadeAnimation1$render(model.state);
-	var _p0 = keyFrame;
+	var state = _user$project$FadeAnimation$render(model.state);
+	var _p0 = state;
 	switch (_p0.ctor) {
 		case 'FadeIn':
 			return _user$project$Main$renderFadeIn;
@@ -8996,13 +9183,55 @@ var _user$project$Main$renderFadeContainer = function (model) {
 			return _user$project$Main$renderFadeOut;
 	}
 };
-var _user$project$Main$subscriptions = function (model) {
-	return _elm_lang$core$Platform_Sub$none;
-};
+var _user$project$Main$update = F2(
+	function (action, model) {
+		var _p1 = action;
+		switch (_p1.ctor) {
+			case 'FadeIn':
+				var newState = A2(
+					_user$project$FadeAnimation$interrupt,
+					A2(
+						_user$project$FadeAnimation$spring,
+						_user$project$FadeAnimation$hide,
+						_user$project$FadeAnimation$fadeIn(5 * _elm_lang$core$Time$second)),
+					model.state);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: newState}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'FadeOut':
+				var newState = A2(
+					_user$project$FadeAnimation$interrupt,
+					A2(
+						_user$project$FadeAnimation$spring,
+						_user$project$FadeAnimation$show,
+						_user$project$FadeAnimation$fadeOut(2 * _elm_lang$core$Time$second)),
+					model.state);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: newState}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var newState = A2(_user$project$FadeAnimation$update, _p1._0, model.state);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{state: newState}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
 	_0: {
-		state: _user$project$FadeAnimation1$state(_user$project$FadeAnimation1$Show)
+		state: _user$project$FadeAnimation$state(_user$project$FadeAnimation$Show)
 	},
 	_1: _elm_lang$core$Platform_Cmd$none
 };
@@ -9012,55 +9241,20 @@ var _user$project$Main$Model = function (a) {
 var _user$project$Main$Animate = function (a) {
 	return {ctor: 'Animate', _0: a};
 };
-var _user$project$Main$update = F2(
-	function (action, model) {
-		var _p1 = action;
-		switch (_p1.ctor) {
-			case 'FadeIn':
-				var _p2 = A2(
-					_user$project$FadeAnimation1$interrupt,
-					_user$project$FadeAnimation1$override(_user$project$FadeAnimation1$FadeIn),
-					model.state);
-				var newState = _p2._0;
-				var cmds = _p2._1;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{state: newState}),
-					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$Animate, cmds)
-				};
-			case 'FadeOut':
-				var _p3 = A2(
-					_user$project$FadeAnimation1$interrupt,
-					_user$project$FadeAnimation1$override(_user$project$FadeAnimation1$FadeOut),
-					model.state);
-				var newState = _p3._0;
-				var cmds = _p3._1;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{state: newState}),
-					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$Animate, cmds)
-				};
-			default:
-				var _p4 = A2(_user$project$FadeAnimation1$update, _p1._0, model.state);
-				var newState = _p4._0;
-				var cmds = _p4._1;
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{state: newState}),
-					_1: A2(_elm_lang$core$Platform_Cmd$map, _user$project$Main$Animate, cmds)
-				};
-		}
-	});
+var _user$project$Main$subscriptions = function (model) {
+	return A2(
+		_user$project$FadeAnimation$subscription,
+		_user$project$Main$Animate,
+		{
+			ctor: '::',
+			_0: model.state,
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$Main$FadeOut = {ctor: 'FadeOut'};
 var _user$project$Main$FadeIn = {ctor: 'FadeIn'};
 var _user$project$Main$view = function (model) {
-	var _p5 = A2(_elm_lang$core$Debug$log, 'render', model);
+	var _p2 = A2(_elm_lang$core$Debug$log, 'render', model);
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
