@@ -49,10 +49,10 @@ update action model =
             let
                 newState =
                     FadeAnimation.interrupt
-                        (FadeAnimation.spring
-                            FadeAnimation.hide
-                            (FadeAnimation.fadeIn (5 * second))
-                        )
+                        [ FadeAnimation.wait (1 * second)
+                        , FadeAnimation.toHide
+                        , FadeAnimation.toFadeIn (5 * second)
+                        ]
                         model.state
             in
             ( { model
@@ -65,10 +65,10 @@ update action model =
             let
                 newState =
                     FadeAnimation.interrupt
-                        (FadeAnimation.spring
-                            FadeAnimation.show
-                            (FadeAnimation.fadeOut (2 * second))
-                        )
+                        [ FadeAnimation.toShow
+                        , FadeAnimation.wait (2 * second)
+                        , FadeAnimation.toFadeOut (2 * second)
+                        ]
                         model.state
             in
             ( { model
@@ -93,11 +93,11 @@ view : Model -> Html Msg
 view model =
     let
         _ =
-            Debug.log "render" model
+            Debug.log "FadeAnimation" model
     in
     div
         []
-        [ renderFadeContainer model
+        [ renderContainer model
         , button
             [ onClick FadeIn
             ]
@@ -109,94 +109,29 @@ view model =
         ]
 
 
-renderFadeContainer : Model -> Html Msg
-renderFadeContainer model =
+renderContainer : Model -> Html Msg
+renderContainer model =
     let
         state =
             FadeAnimation.render
                 model.state
     in
+    div
+        [ class <| className state ]
+        [ text "This container is animating." ]
+
+
+className : FadeAnimation.State -> String
+className state =
     case state of
         FadeAnimation.FadeIn ->
-            renderFadeIn
-
-        FadeAnimation.Show ->
-            renderShow
-
-        FadeAnimation.Hide ->
-            renderHide
+            "container fadeIn"
 
         FadeAnimation.FadeOut ->
-            renderFadeOut
+            "container fadeOut"
 
+        FadeAnimation.Hide ->
+            "container hide"
 
-renderFadeIn : Html Msg
-renderFadeIn =
-    div
-        [ style
-            [ ( "position", "relative" )
-            , ( "margin", "100px auto" )
-            , ( "padding", "25px" )
-            , ( "width", "200px" )
-            , ( "height", "200px" )
-            , ( "background-color", "#268bd2" )
-            , ( "color", "white" )
-            , ( "opacity", "1" )
-            ]
-        , class "container fadeIn"
-        ]
-        [ text "Fade animation container" ]
-
-
-renderShow : Html Msg
-renderShow =
-    div
-        [ style
-            [ ( "position", "relative" )
-            , ( "margin", "100px auto" )
-            , ( "padding", "25px" )
-            , ( "width", "200px" )
-            , ( "height", "200px" )
-            , ( "background-color", "#268bd2" )
-            , ( "color", "white" )
-            , ( "opacity", "1" )
-            ]
-        , class "container"
-        ]
-        [ text "Fade animation container" ]
-
-
-renderFadeOut : Html Msg
-renderFadeOut =
-    div
-        [ style
-            [ ( "position", "relative" )
-            , ( "margin", "100px auto" )
-            , ( "padding", "25px" )
-            , ( "width", "200px" )
-            , ( "height", "200px" )
-            , ( "background-color", "#268bd2" )
-            , ( "color", "white" )
-            , ( "opacity", "0" )
-            ]
-        , class "container fadeOut"
-        ]
-        [ text "Fade animation container" ]
-
-
-renderHide : Html Msg
-renderHide =
-    div
-        [ style
-            [ ( "position", "relative" )
-            , ( "margin", "100px auto" )
-            , ( "padding", "25px" )
-            , ( "width", "200px" )
-            , ( "height", "200px" )
-            , ( "background-color", "#268bd2" )
-            , ( "color", "white" )
-            , ( "opacity", "0" )
-            ]
-        , class "container"
-        ]
-        [ text "Fade animation container" ]
+        FadeAnimation.Show ->
+            "container"

@@ -3,16 +3,16 @@ module FadeAnimation
         ( FadeAnimation
         , Msg
         , State(..)
-        , fadeIn
-        , fadeOut
-        , hide
         , interrupt
         , render
-        , show
-        , spring
         , state
         , subscription
+        , toFadeIn
+        , toFadeOut
+        , toHide
+        , toShow
         , update
+        , wait
         )
 
 import AnimationFrame
@@ -34,13 +34,6 @@ type alias Timing =
     }
 
 
-type Spring
-    = Spring
-        { from : Step
-        , to : Step
-        }
-
-
 type State
     = FadeIn
     | FadeOut
@@ -52,10 +45,9 @@ type Msg
     = Tick Time
 
 
-type alias Step =
-    { state : State
-    , dt : Time
-    }
+type Step
+    = Wait Time
+    | To State Time
 
 
 state : State -> FadeAnimation
@@ -71,47 +63,36 @@ state current =
         }
 
 
-fadeIn : Time -> Step
-fadeIn dt =
-    { state = FadeIn
-    , dt = dt
-    }
+toFadeIn : Time -> Step
+toFadeIn dt =
+    To FadeIn dt
 
 
-fadeOut : Time -> Step
-fadeOut dt =
-    { state = FadeOut
-    , dt = dt
-    }
+toFadeOut : Time -> Step
+toFadeOut dt =
+    To FadeOut dt
 
 
-hide : Step
-hide =
-    { state = Hide
-    , dt = 0
-    }
+toHide : Step
+toHide =
+    To Hide 0
 
 
-show : Step
-show =
-    { state = Show
-    , dt = 0
-    }
+toShow : Step
+toShow =
+    To Show 0
 
 
-spring : Step -> Step -> Spring
-spring from to =
-    Spring
-        { from = from
-        , to = to
-        }
+wait : Time -> Step
+wait =
+    Wait
 
 
-interrupt : Spring -> FadeAnimation -> FadeAnimation
-interrupt (Spring { from, to }) (FadeAnimation model) =
+interrupt : List Step -> FadeAnimation -> FadeAnimation
+interrupt steps (FadeAnimation model) =
     FadeAnimation
         { model
-            | steps = [ from, to ]
+            | steps = steps
             , running = True
         }
 
@@ -172,20 +153,23 @@ refreshTiming now timing =
 
 
 resolveSteps : State -> List Step -> Time -> ( State, List Step )
-resolveSteps currentState steps n =
+resolveSteps currentState steps dt =
     case steps of
         [] ->
             ( currentState, [] )
 
-        { state, dt } :: queuedSteps ->
-            if dt <= 0 then
-                ( state
-                , queuedSteps
-                )
-            else
-                ( state
-                , { state = state, dt = dt - n } :: queuedSteps
-                )
+        step :: queuedSteps ->
+            case step of
+                Wait n ->
+                    if n <= 0 then
+                        resolveSteps currentState queuedSteps dt
+                    else
+                        ( currentState
+                        , (Wait <| n - dt) :: queuedSteps
+                        )
+
+                To target n ->
+                    ( target, List.reverse <| Wait n :: List.reverse queuedSteps )
 
 
 render : FadeAnimation -> State

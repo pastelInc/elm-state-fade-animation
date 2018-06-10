@@ -8845,30 +8845,6 @@ var _user$project$FadeAnimation$render = function (_p0) {
 	var _p1 = _p0;
 	return _p1._0.state;
 };
-var _user$project$FadeAnimation$resolveSteps = F3(
-	function (currentState, steps, n) {
-		var _p2 = steps;
-		if (_p2.ctor === '[]') {
-			return {
-				ctor: '_Tuple2',
-				_0: currentState,
-				_1: {ctor: '[]'}
-			};
-		} else {
-			var _p5 = _p2._0.state;
-			var _p4 = _p2._1;
-			var _p3 = _p2._0.dt;
-			return (_elm_lang$core$Native_Utils.cmp(_p3, 0) < 1) ? {ctor: '_Tuple2', _0: _p5, _1: _p4} : {
-				ctor: '_Tuple2',
-				_0: _p5,
-				_1: {
-					ctor: '::',
-					_0: {state: _p5, dt: _p3 - n},
-					_1: _p4
-				}
-			};
-		}
-	});
 var _user$project$FadeAnimation$refreshTiming = F2(
 	function (now, timing) {
 		var dt = now - timing.current;
@@ -8877,17 +8853,13 @@ var _user$project$FadeAnimation$refreshTiming = F2(
 			dt: ((_elm_lang$core$Native_Utils.cmp(dt, 34) > 0) || _elm_lang$core$Native_Utils.eq(timing.current, 0)) ? 16.666 : dt
 		};
 	});
-var _user$project$FadeAnimation$isRunning = function (_p6) {
-	var _p7 = _p6;
-	return _p7._0.running;
+var _user$project$FadeAnimation$isRunning = function (_p2) {
+	var _p3 = _p2;
+	return _p3._0.running;
 };
 var _user$project$FadeAnimation$Timing = F2(
 	function (a, b) {
 		return {current: a, dt: b};
-	});
-var _user$project$FadeAnimation$Step = F2(
-	function (a, b) {
-		return {state: a, dt: b};
 	});
 var _user$project$FadeAnimation$FadeAnimation = function (a) {
 	return {ctor: 'FadeAnimation', _0: a};
@@ -8902,66 +8874,17 @@ var _user$project$FadeAnimation$state = function (current) {
 		});
 };
 var _user$project$FadeAnimation$interrupt = F2(
-	function (_p9, _p8) {
-		var _p10 = _p9;
-		var _p11 = _p8;
+	function (steps, _p4) {
+		var _p5 = _p4;
 		return _user$project$FadeAnimation$FadeAnimation(
 			_elm_lang$core$Native_Utils.update(
-				_p11._0,
-				{
-					steps: {
-						ctor: '::',
-						_0: _p10._0.from,
-						_1: {
-							ctor: '::',
-							_0: _p10._0.to,
-							_1: {ctor: '[]'}
-						}
-					},
-					running: true
-				}));
-	});
-var _user$project$FadeAnimation$update = F2(
-	function (_p13, _p12) {
-		var _p14 = _p13;
-		var _p15 = _p12;
-		var _p17 = _p15._0;
-		var timing = A2(_user$project$FadeAnimation$refreshTiming, _p14._0, _p17.timing);
-		var _p16 = A3(_user$project$FadeAnimation$resolveSteps, _p15._0.state, _p15._0.steps, timing.dt);
-		var revisedState = _p16._0;
-		var revisedSteps = _p16._1;
-		return _user$project$FadeAnimation$FadeAnimation(
-			_elm_lang$core$Native_Utils.update(
-				_p17,
-				{
-					steps: revisedSteps,
-					state: revisedState,
-					timing: timing,
-					running: !_elm_lang$core$Native_Utils.eq(
-						_elm_lang$core$List$length(revisedSteps),
-						0)
-				}));
-	});
-var _user$project$FadeAnimation$Spring = function (a) {
-	return {ctor: 'Spring', _0: a};
-};
-var _user$project$FadeAnimation$spring = F2(
-	function (from, to) {
-		return _user$project$FadeAnimation$Spring(
-			{from: from, to: to});
+				_p5._0,
+				{steps: steps, running: true}));
 	});
 var _user$project$FadeAnimation$Show = {ctor: 'Show'};
-var _user$project$FadeAnimation$show = {state: _user$project$FadeAnimation$Show, dt: 0};
 var _user$project$FadeAnimation$Hide = {ctor: 'Hide'};
-var _user$project$FadeAnimation$hide = {state: _user$project$FadeAnimation$Hide, dt: 0};
 var _user$project$FadeAnimation$FadeOut = {ctor: 'FadeOut'};
-var _user$project$FadeAnimation$fadeOut = function (dt) {
-	return {state: _user$project$FadeAnimation$FadeOut, dt: dt};
-};
 var _user$project$FadeAnimation$FadeIn = {ctor: 'FadeIn'};
-var _user$project$FadeAnimation$fadeIn = function (dt) {
-	return {state: _user$project$FadeAnimation$FadeIn, dt: dt};
-};
 var _user$project$FadeAnimation$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
@@ -8972,216 +8895,122 @@ var _user$project$FadeAnimation$subscription = F2(
 			msg,
 			_elm_lang$animation_frame$AnimationFrame$times(_user$project$FadeAnimation$Tick)) : _elm_lang$core$Platform_Sub$none;
 	});
+var _user$project$FadeAnimation$To = F2(
+	function (a, b) {
+		return {ctor: 'To', _0: a, _1: b};
+	});
+var _user$project$FadeAnimation$toFadeIn = function (dt) {
+	return A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$FadeIn, dt);
+};
+var _user$project$FadeAnimation$toFadeOut = function (dt) {
+	return A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$FadeOut, dt);
+};
+var _user$project$FadeAnimation$toHide = A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$Hide, 0);
+var _user$project$FadeAnimation$toShow = A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$Show, 0);
+var _user$project$FadeAnimation$Wait = function (a) {
+	return {ctor: 'Wait', _0: a};
+};
+var _user$project$FadeAnimation$wait = _user$project$FadeAnimation$Wait;
+var _user$project$FadeAnimation$resolveSteps = F3(
+	function (currentState, steps, dt) {
+		resolveSteps:
+		while (true) {
+			var _p6 = steps;
+			if (_p6.ctor === '[]') {
+				return {
+					ctor: '_Tuple2',
+					_0: currentState,
+					_1: {ctor: '[]'}
+				};
+			} else {
+				var _p9 = _p6._1;
+				var _p7 = _p6._0;
+				if (_p7.ctor === 'Wait') {
+					var _p8 = _p7._0;
+					if (_elm_lang$core$Native_Utils.cmp(_p8, 0) < 1) {
+						var _v5 = currentState,
+							_v6 = _p9,
+							_v7 = dt;
+						currentState = _v5;
+						steps = _v6;
+						dt = _v7;
+						continue resolveSteps;
+					} else {
+						return {
+							ctor: '_Tuple2',
+							_0: currentState,
+							_1: {
+								ctor: '::',
+								_0: _user$project$FadeAnimation$Wait(_p8 - dt),
+								_1: _p9
+							}
+						};
+					}
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _p7._0,
+						_1: _elm_lang$core$List$reverse(
+							{
+								ctor: '::',
+								_0: _user$project$FadeAnimation$Wait(_p7._1),
+								_1: _elm_lang$core$List$reverse(_p9)
+							})
+					};
+				}
+			}
+		}
+	});
+var _user$project$FadeAnimation$update = F2(
+	function (_p11, _p10) {
+		var _p12 = _p11;
+		var _p13 = _p10;
+		var _p15 = _p13._0;
+		var timing = A2(_user$project$FadeAnimation$refreshTiming, _p12._0, _p15.timing);
+		var _p14 = A3(_user$project$FadeAnimation$resolveSteps, _p13._0.state, _p13._0.steps, timing.dt);
+		var revisedState = _p14._0;
+		var revisedSteps = _p14._1;
+		return _user$project$FadeAnimation$FadeAnimation(
+			_elm_lang$core$Native_Utils.update(
+				_p15,
+				{
+					steps: revisedSteps,
+					state: revisedState,
+					timing: timing,
+					running: !_elm_lang$core$Native_Utils.eq(
+						_elm_lang$core$List$length(revisedSteps),
+						0)
+				}));
+	});
 
-var _user$project$Main$renderHide = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$style(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'position', _1: 'relative'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'margin', _1: '100px auto'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'padding', _1: '25px'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'width', _1: '200px'},
-							_1: {
-								ctor: '::',
-								_0: {ctor: '_Tuple2', _0: 'height', _1: '200px'},
-								_1: {
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#268bd2'},
-									_1: {
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
-										_1: {
-											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '0'},
-											_1: {ctor: '[]'}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}),
-		_1: {
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('container'),
-			_1: {ctor: '[]'}
-		}
-	},
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html$text('Fade animation container'),
-		_1: {ctor: '[]'}
-	});
-var _user$project$Main$renderFadeOut = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$style(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'position', _1: 'relative'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'margin', _1: '100px auto'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'padding', _1: '25px'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'width', _1: '200px'},
-							_1: {
-								ctor: '::',
-								_0: {ctor: '_Tuple2', _0: 'height', _1: '200px'},
-								_1: {
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#268bd2'},
-									_1: {
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
-										_1: {
-											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '0'},
-											_1: {ctor: '[]'}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}),
-		_1: {
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('container fadeOut'),
-			_1: {ctor: '[]'}
-		}
-	},
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html$text('Fade animation container'),
-		_1: {ctor: '[]'}
-	});
-var _user$project$Main$renderShow = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$style(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'position', _1: 'relative'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'margin', _1: '100px auto'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'padding', _1: '25px'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'width', _1: '200px'},
-							_1: {
-								ctor: '::',
-								_0: {ctor: '_Tuple2', _0: 'height', _1: '200px'},
-								_1: {
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#268bd2'},
-									_1: {
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
-										_1: {
-											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '1'},
-											_1: {ctor: '[]'}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}),
-		_1: {
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('container'),
-			_1: {ctor: '[]'}
-		}
-	},
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html$text('Fade animation container'),
-		_1: {ctor: '[]'}
-	});
-var _user$project$Main$renderFadeIn = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$style(
-			{
-				ctor: '::',
-				_0: {ctor: '_Tuple2', _0: 'position', _1: 'relative'},
-				_1: {
-					ctor: '::',
-					_0: {ctor: '_Tuple2', _0: 'margin', _1: '100px auto'},
-					_1: {
-						ctor: '::',
-						_0: {ctor: '_Tuple2', _0: 'padding', _1: '25px'},
-						_1: {
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'width', _1: '200px'},
-							_1: {
-								ctor: '::',
-								_0: {ctor: '_Tuple2', _0: 'height', _1: '200px'},
-								_1: {
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'background-color', _1: '#268bd2'},
-									_1: {
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'color', _1: 'white'},
-										_1: {
-											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'opacity', _1: '1'},
-											_1: {ctor: '[]'}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}),
-		_1: {
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('container fadeIn'),
-			_1: {ctor: '[]'}
-		}
-	},
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html$text('Fade animation container'),
-		_1: {ctor: '[]'}
-	});
-var _user$project$Main$renderFadeContainer = function (model) {
-	var state = _user$project$FadeAnimation$render(model.state);
+var _user$project$Main$className = function (state) {
 	var _p0 = state;
 	switch (_p0.ctor) {
 		case 'FadeIn':
-			return _user$project$Main$renderFadeIn;
-		case 'Show':
-			return _user$project$Main$renderShow;
+			return 'container fadeIn';
+		case 'FadeOut':
+			return 'container fadeOut';
 		case 'Hide':
-			return _user$project$Main$renderHide;
+			return 'container hide';
 		default:
-			return _user$project$Main$renderFadeOut;
+			return 'container';
 	}
+};
+var _user$project$Main$renderContainer = function (model) {
+	var state = _user$project$FadeAnimation$render(model.state);
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class(
+				_user$project$Main$className(state)),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html$text('This container is animating.'),
+			_1: {ctor: '[]'}
+		});
 };
 var _user$project$Main$update = F2(
 	function (action, model) {
@@ -9190,10 +9019,15 @@ var _user$project$Main$update = F2(
 			case 'FadeIn':
 				var newState = A2(
 					_user$project$FadeAnimation$interrupt,
-					A2(
-						_user$project$FadeAnimation$spring,
-						_user$project$FadeAnimation$hide,
-						_user$project$FadeAnimation$fadeIn(5 * _elm_lang$core$Time$second)),
+					{
+						ctor: '::',
+						_0: _user$project$FadeAnimation$toHide,
+						_1: {
+							ctor: '::',
+							_0: _user$project$FadeAnimation$toFadeIn(5 * _elm_lang$core$Time$second),
+							_1: {ctor: '[]'}
+						}
+					},
 					model.state);
 				return {
 					ctor: '_Tuple2',
@@ -9205,10 +9039,15 @@ var _user$project$Main$update = F2(
 			case 'FadeOut':
 				var newState = A2(
 					_user$project$FadeAnimation$interrupt,
-					A2(
-						_user$project$FadeAnimation$spring,
-						_user$project$FadeAnimation$show,
-						_user$project$FadeAnimation$fadeOut(2 * _elm_lang$core$Time$second)),
+					{
+						ctor: '::',
+						_0: _user$project$FadeAnimation$toShow,
+						_1: {
+							ctor: '::',
+							_0: _user$project$FadeAnimation$toFadeOut(2 * _elm_lang$core$Time$second),
+							_1: {ctor: '[]'}
+						}
+					},
 					model.state);
 				return {
 					ctor: '_Tuple2',
@@ -9254,13 +9093,13 @@ var _user$project$Main$subscriptions = function (model) {
 var _user$project$Main$FadeOut = {ctor: 'FadeOut'};
 var _user$project$Main$FadeIn = {ctor: 'FadeIn'};
 var _user$project$Main$view = function (model) {
-	var _p2 = A2(_elm_lang$core$Debug$log, 'render', model);
+	var _p2 = A2(_elm_lang$core$Debug$log, 'FadeAnimation', model);
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: _user$project$Main$renderFadeContainer(model),
+			_0: _user$project$Main$renderContainer(model),
 			_1: {
 				ctor: '::',
 				_0: A2(

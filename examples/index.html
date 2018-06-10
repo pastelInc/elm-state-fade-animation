@@ -22,13 +22,27 @@
             0% {opacity: 1}
             100% {opacity: 0}
         }
+        .container {
+            position: relative;
+            margin: 100px auto;
+            padding: 25px;
+            width: 200px;
+            height: 200px;
+            background-color: #268bd2;
+            color: white;
+        }
+        .container.hide {
+            opacity: 0;
+        }
         .container.fadeIn {
             animation: fadeIn 5s ease 0s 1 normal;
             -webkit-animation: fadeIn 5s ease 0s 1 normal;
+            animation-fill-mode: forwards;
         }
         .container.fadeOut {
             animation: fadeOut 2s ease 0s 1 normal;
             -webkit-animation: fadeOut 2s ease 0s 1 normal;
+            animation-fill-mode: forwards;
         }
     </style>
     <script src="elm.js"></script>
