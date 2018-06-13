@@ -25,7 +25,7 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     ( { state =
-            FadeAnimation.state FadeAnimation.Show
+            FadeAnimation.visible
       }
     , Cmd.none
     )
@@ -50,8 +50,8 @@ update action model =
                 newState =
                     FadeAnimation.interrupt
                         [ FadeAnimation.wait (1 * second)
-                        , FadeAnimation.playback 0 FadeAnimation.Hide
-                        , FadeAnimation.playback (5 * second) FadeAnimation.FadeIn
+                        , FadeAnimation.hide
+                        , FadeAnimation.fadeIn (5 * second)
                         ]
                         model.state
             in
@@ -65,9 +65,9 @@ update action model =
             let
                 newState =
                     FadeAnimation.interrupt
-                        [ FadeAnimation.playback 0 FadeAnimation.Show
+                        [ FadeAnimation.show
                         , FadeAnimation.wait (2 * second)
-                        , FadeAnimation.playback (2 * second) FadeAnimation.FadeOut
+                        , FadeAnimation.fadeOut (2 * second)
                         ]
                         model.state
             in

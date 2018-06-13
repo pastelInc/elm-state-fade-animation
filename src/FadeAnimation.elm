@@ -3,14 +3,17 @@ module FadeAnimation
         ( Config
         , FadeAnimation
         , Msg
-        , State(FadeIn, FadeOut, Hide, Show)
         , config
+        , fadeIn
+        , fadeOut
+        , hidden
+        , hide
         , interrupt
-        , playback
         , render
-        , state
+        , show
         , subscription
         , update
+        , visible
         , wait
         )
 
@@ -62,9 +65,34 @@ state current =
         }
 
 
-playback : Time -> State -> Animation
-playback =
-    Animation
+visible : FadeAnimation
+visible =
+    state Show
+
+
+hidden : FadeAnimation
+hidden =
+    state Hide
+
+
+fadeIn : Time -> Animation
+fadeIn dt =
+    Animation dt FadeIn
+
+
+fadeOut : Time -> Animation
+fadeOut dt =
+    Animation dt FadeOut
+
+
+hide : Animation
+hide =
+    Animation 0 Hide
+
+
+show : Animation
+show =
+    Animation 0 Show
 
 
 wait : Time -> Animation

@@ -8894,7 +8894,9 @@ var _user$project$FadeAnimation$interrupt = F2(
 				{playlists: playlists, running: true}));
 	});
 var _user$project$FadeAnimation$Show = {ctor: 'Show'};
+var _user$project$FadeAnimation$visible = _user$project$FadeAnimation$state(_user$project$FadeAnimation$Show);
 var _user$project$FadeAnimation$Hide = {ctor: 'Hide'};
+var _user$project$FadeAnimation$hidden = _user$project$FadeAnimation$state(_user$project$FadeAnimation$Hide);
 var _user$project$FadeAnimation$FadeOut = {ctor: 'FadeOut'};
 var _user$project$FadeAnimation$FadeIn = {ctor: 'FadeIn'};
 var _user$project$FadeAnimation$Tick = function (a) {
@@ -8911,7 +8913,14 @@ var _user$project$FadeAnimation$Animation = F2(
 	function (a, b) {
 		return {ctor: 'Animation', _0: a, _1: b};
 	});
-var _user$project$FadeAnimation$playback = _user$project$FadeAnimation$Animation;
+var _user$project$FadeAnimation$fadeIn = function (dt) {
+	return A2(_user$project$FadeAnimation$Animation, dt, _user$project$FadeAnimation$FadeIn);
+};
+var _user$project$FadeAnimation$fadeOut = function (dt) {
+	return A2(_user$project$FadeAnimation$Animation, dt, _user$project$FadeAnimation$FadeOut);
+};
+var _user$project$FadeAnimation$hide = A2(_user$project$FadeAnimation$Animation, 0, _user$project$FadeAnimation$Hide);
+var _user$project$FadeAnimation$show = A2(_user$project$FadeAnimation$Animation, 0, _user$project$FadeAnimation$Show);
 var _user$project$FadeAnimation$Wait = function (a) {
 	return {ctor: 'Wait', _0: a};
 };
@@ -8998,7 +9007,7 @@ var _user$project$FadeAnimation$config = function (_p19) {
 
 var _user$project$Main$config = _user$project$FadeAnimation$config(
 	{fadeIn: 'container fadeIn', fadeOut: 'container fadeOut', hide: 'container hide', show: 'container'});
-var _user$project$Main$renderContainer = function (model) {
+var _user$project$Main$viewContainer = function (model) {
 	var classes = _elm_lang$html$Html_Attributes$class(
 		A2(_user$project$FadeAnimation$render, _user$project$Main$config, model.state));
 	return A2(
@@ -9026,10 +9035,10 @@ var _user$project$Main$update = F2(
 						_0: _user$project$FadeAnimation$wait(1 * _elm_lang$core$Time$second),
 						_1: {
 							ctor: '::',
-							_0: A2(_user$project$FadeAnimation$playback, 0, _user$project$FadeAnimation$Hide),
+							_0: _user$project$FadeAnimation$hide,
 							_1: {
 								ctor: '::',
-								_0: A2(_user$project$FadeAnimation$playback, 5 * _elm_lang$core$Time$second, _user$project$FadeAnimation$FadeIn),
+								_0: _user$project$FadeAnimation$fadeIn(5 * _elm_lang$core$Time$second),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -9047,13 +9056,13 @@ var _user$project$Main$update = F2(
 					_user$project$FadeAnimation$interrupt,
 					{
 						ctor: '::',
-						_0: A2(_user$project$FadeAnimation$playback, 0, _user$project$FadeAnimation$Show),
+						_0: _user$project$FadeAnimation$show,
 						_1: {
 							ctor: '::',
 							_0: _user$project$FadeAnimation$wait(2 * _elm_lang$core$Time$second),
 							_1: {
 								ctor: '::',
-								_0: A2(_user$project$FadeAnimation$playback, 2 * _elm_lang$core$Time$second, _user$project$FadeAnimation$FadeOut),
+								_0: _user$project$FadeAnimation$fadeOut(2 * _elm_lang$core$Time$second),
 								_1: {ctor: '[]'}
 							}
 						}
@@ -9079,9 +9088,7 @@ var _user$project$Main$update = F2(
 	});
 var _user$project$Main$init = {
 	ctor: '_Tuple2',
-	_0: {
-		state: _user$project$FadeAnimation$state(_user$project$FadeAnimation$Show)
-	},
+	_0: {state: _user$project$FadeAnimation$visible},
 	_1: _elm_lang$core$Platform_Cmd$none
 };
 var _user$project$Main$Model = function (a) {
@@ -9109,7 +9116,7 @@ var _user$project$Main$view = function (model) {
 		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: _user$project$Main$renderContainer(model),
+			_0: _user$project$Main$viewContainer(model),
 			_1: {
 				ctor: '::',
 				_0: A2(
