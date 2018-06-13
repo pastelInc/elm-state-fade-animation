@@ -1,16 +1,15 @@
 module FadeAnimation
     exposing
-        ( FadeAnimation
+        ( Config
+        , FadeAnimation
         , Msg
-        , State(..)
+        , State(FadeIn, FadeOut, Hide, Show)
+        , config
         , interrupt
+        , playback
         , render
         , state
         , subscription
-        , toFadeIn
-        , toFadeOut
-        , toHide
-        , toShow
         , update
         , wait
         )
@@ -21,7 +20,7 @@ import Time exposing (Time)
 
 type FadeAnimation
     = FadeAnimation
-        { steps : List Step
+        { playlists : List Animation
         , state : State
         , timing : Timing
         , running : Bool
@@ -30,7 +29,7 @@ type FadeAnimation
 
 type alias Timing =
     { current : Time
-    , dt : Time
+    , duration : Time
     }
 
 
@@ -45,54 +44,39 @@ type Msg
     = Tick Time
 
 
-type Step
+type Animation
     = Wait Time
-    | To State Time
+    | Animation Time State
 
 
 state : State -> FadeAnimation
 state current =
     FadeAnimation
-        { steps = []
+        { playlists = []
         , state = current
         , timing =
             { current = 0
-            , dt = 0
+            , duration = 0
             }
         , running = False
         }
 
 
-toFadeIn : Time -> Step
-toFadeIn dt =
-    To FadeIn dt
+playback : Time -> State -> Animation
+playback =
+    Animation
 
 
-toFadeOut : Time -> Step
-toFadeOut dt =
-    To FadeOut dt
-
-
-toHide : Step
-toHide =
-    To Hide 0
-
-
-toShow : Step
-toShow =
-    To Show 0
-
-
-wait : Time -> Step
+wait : Time -> Animation
 wait =
     Wait
 
 
-interrupt : List Step -> FadeAnimation -> FadeAnimation
-interrupt steps (FadeAnimation model) =
+interrupt : List Animation -> FadeAnimation -> FadeAnimation
+interrupt playlists (FadeAnimation model) =
     FadeAnimation
         { model
-            | steps = steps
+            | playlists = playlists
             , running = True
         }
 
@@ -111,67 +95,103 @@ isRunning (FadeAnimation model) =
 
 
 update : Msg -> FadeAnimation -> FadeAnimation
-update (Tick now) (FadeAnimation ({ steps, state } as model)) =
+update (Tick now) (FadeAnimation ({ playlists, state } as model)) =
     let
-        -- set current and dt time
         timing =
             refreshTiming now model.timing
 
-        ( revisedState, revisedSteps ) =
-            resolveSteps state steps timing.dt
+        ( revisedState, revisedPlaylists ) =
+            resolvePlaylists state playlists timing.duration
     in
     FadeAnimation
         { model
-            | steps = revisedSteps
+            | playlists = revisedPlaylists
             , state = revisedState
             , timing = timing
             , running =
-                List.length revisedSteps /= 0
+                List.length revisedPlaylists /= 0
         }
 
 
 refreshTiming : Time -> Timing -> Timing
 refreshTiming now timing =
     let
-        dt =
+        duration =
             now - timing.current
 
-        -- dt is set to one frame (16.66) if it is a large dt(more than 2 frames),
-        -- A large dt means one of the following:
-        --    * the user left the browser window and came back
-        --    * the animation subscription has stopped calling for updates for a while and started running again
+        -- NOTE:
+        -- If duration is longer than 2 frames, it is fixed to the time of 1 frame.
+        -- When duration is longer than 2 frames, it is as follows.
+        --    + the user leaves the browser window and returns
+        --    + subscription stops updating and starts updating again
         --
-        -- We also have a special case when timing.current == 0, which is happens at startup.
+        -- If timing.current == 0, there are special cases that occur at startup.
     in
     { current = now
-    , dt =
-        if dt > 34 || timing.current == 0 then
+    , duration =
+        if duration > 34 || timing.current == 0 then
             16.666
         else
-            dt
+            duration
     }
 
 
-resolveSteps : State -> List Step -> Time -> ( State, List Step )
-resolveSteps currentState steps dt =
-    case steps of
+resolvePlaylists : State -> List Animation -> Time -> ( State, List Animation )
+resolvePlaylists currentState playlists duration =
+    case playlists of
         [] ->
             ( currentState, [] )
 
-        step :: queuedSteps ->
-            case step of
+        animation :: queuedPlaylists ->
+            case animation of
                 Wait n ->
                     if n <= 0 then
-                        resolveSteps currentState queuedSteps dt
+                        resolvePlaylists currentState queuedPlaylists duration
                     else
                         ( currentState
-                        , (Wait <| n - dt) :: queuedSteps
+                        , (Wait <| n - duration) :: queuedPlaylists
                         )
 
-                To target n ->
-                    ( target, List.reverse <| Wait n :: List.reverse queuedSteps )
+                Animation n target ->
+                    ( target, List.reverse <| Wait n :: List.reverse queuedPlaylists )
 
 
-render : FadeAnimation -> State
-render (FadeAnimation model) =
-    model.state
+type Config a
+    = Config
+        { fadeIn : a
+        , fadeOut : a
+        , hide : a
+        , show : a
+        }
+
+
+config :
+    { fadeIn : a
+    , fadeOut : a
+    , hide : a
+    , show : a
+    }
+    -> Config a
+config { fadeIn, fadeOut, hide, show } =
+    Config
+        { fadeIn = fadeIn
+        , fadeOut = fadeOut
+        , hide = hide
+        , show = show
+        }
+
+
+render : Config a -> FadeAnimation -> a
+render (Config { fadeIn, fadeOut, hide, show }) (FadeAnimation { state }) =
+    case state of
+        FadeIn ->
+            fadeIn
+
+        FadeOut ->
+            fadeOut
+
+        Hide ->
+            hide
+
+        Show ->
+            show

@@ -50,8 +50,8 @@ update action model =
                 newState =
                     FadeAnimation.interrupt
                         [ FadeAnimation.wait (1 * second)
-                        , FadeAnimation.toHide
-                        , FadeAnimation.toFadeIn (5 * second)
+                        , FadeAnimation.playback 0 FadeAnimation.Hide
+                        , FadeAnimation.playback (5 * second) FadeAnimation.FadeIn
                         ]
                         model.state
             in
@@ -65,9 +65,9 @@ update action model =
             let
                 newState =
                     FadeAnimation.interrupt
-                        [ FadeAnimation.toShow
+                        [ FadeAnimation.playback 0 FadeAnimation.Show
                         , FadeAnimation.wait (2 * second)
-                        , FadeAnimation.toFadeOut (2 * second)
+                        , FadeAnimation.playback (2 * second) FadeAnimation.FadeOut
                         ]
                         model.state
             in
@@ -97,7 +97,7 @@ view model =
     in
     div
         []
-        [ renderContainer model
+        [ viewContainer model
         , button
             [ onClick FadeIn
             ]
@@ -109,29 +109,23 @@ view model =
         ]
 
 
-renderContainer : Model -> Html Msg
-renderContainer model =
+viewContainer : Model -> Html Msg
+viewContainer model =
     let
-        state =
-            FadeAnimation.render
-                model.state
+        classes =
+            class <|
+                FadeAnimation.render config model.state
     in
     div
-        [ class <| className state ]
+        [ classes ]
         [ text "This container is animating." ]
 
 
-className : FadeAnimation.State -> String
-className state =
-    case state of
-        FadeAnimation.FadeIn ->
-            "container fadeIn"
-
-        FadeAnimation.FadeOut ->
-            "container fadeOut"
-
-        FadeAnimation.Hide ->
-            "container hide"
-
-        FadeAnimation.Show ->
-            "container"
+config : FadeAnimation.Config String
+config =
+    FadeAnimation.config
+        { fadeIn = "container fadeIn"
+        , fadeOut = "container fadeOut"
+        , hide = "container hide"
+        , show = "container"
+        }

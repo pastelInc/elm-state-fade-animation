@@ -8841,25 +8841,37 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _user$project$FadeAnimation$render = function (_p0) {
-	var _p1 = _p0;
-	return _p1._0.state;
-};
+var _user$project$FadeAnimation$render = F2(
+	function (_p1, _p0) {
+		var _p2 = _p1;
+		var _p3 = _p0;
+		var _p4 = _p3._0.state;
+		switch (_p4.ctor) {
+			case 'FadeIn':
+				return _p2._0.fadeIn;
+			case 'FadeOut':
+				return _p2._0.fadeOut;
+			case 'Hide':
+				return _p2._0.hide;
+			default:
+				return _p2._0.show;
+		}
+	});
 var _user$project$FadeAnimation$refreshTiming = F2(
 	function (now, timing) {
-		var dt = now - timing.current;
+		var duration = now - timing.current;
 		return {
 			current: now,
-			dt: ((_elm_lang$core$Native_Utils.cmp(dt, 34) > 0) || _elm_lang$core$Native_Utils.eq(timing.current, 0)) ? 16.666 : dt
+			duration: ((_elm_lang$core$Native_Utils.cmp(duration, 34) > 0) || _elm_lang$core$Native_Utils.eq(timing.current, 0)) ? 16.666 : duration
 		};
 	});
-var _user$project$FadeAnimation$isRunning = function (_p2) {
-	var _p3 = _p2;
-	return _p3._0.running;
+var _user$project$FadeAnimation$isRunning = function (_p5) {
+	var _p6 = _p5;
+	return _p6._0.running;
 };
 var _user$project$FadeAnimation$Timing = F2(
 	function (a, b) {
-		return {current: a, dt: b};
+		return {current: a, duration: b};
 	});
 var _user$project$FadeAnimation$FadeAnimation = function (a) {
 	return {ctor: 'FadeAnimation', _0: a};
@@ -8867,19 +8879,19 @@ var _user$project$FadeAnimation$FadeAnimation = function (a) {
 var _user$project$FadeAnimation$state = function (current) {
 	return _user$project$FadeAnimation$FadeAnimation(
 		{
-			steps: {ctor: '[]'},
+			playlists: {ctor: '[]'},
 			state: current,
-			timing: {current: 0, dt: 0},
+			timing: {current: 0, duration: 0},
 			running: false
 		});
 };
 var _user$project$FadeAnimation$interrupt = F2(
-	function (steps, _p4) {
-		var _p5 = _p4;
+	function (playlists, _p7) {
+		var _p8 = _p7;
 		return _user$project$FadeAnimation$FadeAnimation(
 			_elm_lang$core$Native_Utils.update(
-				_p5._0,
-				{steps: steps, running: true}));
+				_p8._0,
+				{playlists: playlists, running: true}));
 	});
 var _user$project$FadeAnimation$Show = {ctor: 'Show'};
 var _user$project$FadeAnimation$Hide = {ctor: 'Hide'};
@@ -8895,66 +8907,59 @@ var _user$project$FadeAnimation$subscription = F2(
 			msg,
 			_elm_lang$animation_frame$AnimationFrame$times(_user$project$FadeAnimation$Tick)) : _elm_lang$core$Platform_Sub$none;
 	});
-var _user$project$FadeAnimation$To = F2(
+var _user$project$FadeAnimation$Animation = F2(
 	function (a, b) {
-		return {ctor: 'To', _0: a, _1: b};
+		return {ctor: 'Animation', _0: a, _1: b};
 	});
-var _user$project$FadeAnimation$toFadeIn = function (dt) {
-	return A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$FadeIn, dt);
-};
-var _user$project$FadeAnimation$toFadeOut = function (dt) {
-	return A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$FadeOut, dt);
-};
-var _user$project$FadeAnimation$toHide = A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$Hide, 0);
-var _user$project$FadeAnimation$toShow = A2(_user$project$FadeAnimation$To, _user$project$FadeAnimation$Show, 0);
+var _user$project$FadeAnimation$playback = _user$project$FadeAnimation$Animation;
 var _user$project$FadeAnimation$Wait = function (a) {
 	return {ctor: 'Wait', _0: a};
 };
 var _user$project$FadeAnimation$wait = _user$project$FadeAnimation$Wait;
-var _user$project$FadeAnimation$resolveSteps = F3(
-	function (currentState, steps, dt) {
-		resolveSteps:
+var _user$project$FadeAnimation$resolvePlaylists = F3(
+	function (currentState, playlists, duration) {
+		resolvePlaylists:
 		while (true) {
-			var _p6 = steps;
-			if (_p6.ctor === '[]') {
+			var _p9 = playlists;
+			if (_p9.ctor === '[]') {
 				return {
 					ctor: '_Tuple2',
 					_0: currentState,
 					_1: {ctor: '[]'}
 				};
 			} else {
-				var _p9 = _p6._1;
-				var _p7 = _p6._0;
-				if (_p7.ctor === 'Wait') {
-					var _p8 = _p7._0;
-					if (_elm_lang$core$Native_Utils.cmp(_p8, 0) < 1) {
-						var _v5 = currentState,
-							_v6 = _p9,
-							_v7 = dt;
-						currentState = _v5;
-						steps = _v6;
-						dt = _v7;
-						continue resolveSteps;
+				var _p12 = _p9._1;
+				var _p10 = _p9._0;
+				if (_p10.ctor === 'Wait') {
+					var _p11 = _p10._0;
+					if (_elm_lang$core$Native_Utils.cmp(_p11, 0) < 1) {
+						var _v7 = currentState,
+							_v8 = _p12,
+							_v9 = duration;
+						currentState = _v7;
+						playlists = _v8;
+						duration = _v9;
+						continue resolvePlaylists;
 					} else {
 						return {
 							ctor: '_Tuple2',
 							_0: currentState,
 							_1: {
 								ctor: '::',
-								_0: _user$project$FadeAnimation$Wait(_p8 - dt),
-								_1: _p9
+								_0: _user$project$FadeAnimation$Wait(_p11 - duration),
+								_1: _p12
 							}
 						};
 					}
 				} else {
 					return {
 						ctor: '_Tuple2',
-						_0: _p7._0,
+						_0: _p10._1,
 						_1: _elm_lang$core$List$reverse(
 							{
 								ctor: '::',
-								_0: _user$project$FadeAnimation$Wait(_p7._1),
-								_1: _elm_lang$core$List$reverse(_p9)
+								_0: _user$project$FadeAnimation$Wait(_p10._0),
+								_1: _elm_lang$core$List$reverse(_p12)
 							})
 					};
 				}
@@ -8962,48 +8967,45 @@ var _user$project$FadeAnimation$resolveSteps = F3(
 		}
 	});
 var _user$project$FadeAnimation$update = F2(
-	function (_p11, _p10) {
-		var _p12 = _p11;
-		var _p13 = _p10;
-		var _p15 = _p13._0;
-		var timing = A2(_user$project$FadeAnimation$refreshTiming, _p12._0, _p15.timing);
-		var _p14 = A3(_user$project$FadeAnimation$resolveSteps, _p13._0.state, _p13._0.steps, timing.dt);
-		var revisedState = _p14._0;
-		var revisedSteps = _p14._1;
+	function (_p14, _p13) {
+		var _p15 = _p14;
+		var _p16 = _p13;
+		var _p18 = _p16._0;
+		var timing = A2(_user$project$FadeAnimation$refreshTiming, _p15._0, _p18.timing);
+		var _p17 = A3(_user$project$FadeAnimation$resolvePlaylists, _p16._0.state, _p16._0.playlists, timing.duration);
+		var revisedState = _p17._0;
+		var revisedPlaylists = _p17._1;
 		return _user$project$FadeAnimation$FadeAnimation(
 			_elm_lang$core$Native_Utils.update(
-				_p15,
+				_p18,
 				{
-					steps: revisedSteps,
+					playlists: revisedPlaylists,
 					state: revisedState,
 					timing: timing,
 					running: !_elm_lang$core$Native_Utils.eq(
-						_elm_lang$core$List$length(revisedSteps),
+						_elm_lang$core$List$length(revisedPlaylists),
 						0)
 				}));
 	});
-
-var _user$project$Main$className = function (state) {
-	var _p0 = state;
-	switch (_p0.ctor) {
-		case 'FadeIn':
-			return 'container fadeIn';
-		case 'FadeOut':
-			return 'container fadeOut';
-		case 'Hide':
-			return 'container hide';
-		default:
-			return 'container';
-	}
+var _user$project$FadeAnimation$Config = function (a) {
+	return {ctor: 'Config', _0: a};
 };
+var _user$project$FadeAnimation$config = function (_p19) {
+	var _p20 = _p19;
+	return _user$project$FadeAnimation$Config(
+		{fadeIn: _p20.fadeIn, fadeOut: _p20.fadeOut, hide: _p20.hide, show: _p20.show});
+};
+
+var _user$project$Main$config = _user$project$FadeAnimation$config(
+	{fadeIn: 'container fadeIn', fadeOut: 'container fadeOut', hide: 'container hide', show: 'container'});
 var _user$project$Main$renderContainer = function (model) {
-	var state = _user$project$FadeAnimation$render(model.state);
+	var classes = _elm_lang$html$Html_Attributes$class(
+		A2(_user$project$FadeAnimation$render, _user$project$Main$config, model.state));
 	return A2(
 		_elm_lang$html$Html$div,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class(
-				_user$project$Main$className(state)),
+			_0: classes,
 			_1: {ctor: '[]'}
 		},
 		{
@@ -9014,18 +9016,22 @@ var _user$project$Main$renderContainer = function (model) {
 };
 var _user$project$Main$update = F2(
 	function (action, model) {
-		var _p1 = action;
-		switch (_p1.ctor) {
+		var _p0 = action;
+		switch (_p0.ctor) {
 			case 'FadeIn':
 				var newState = A2(
 					_user$project$FadeAnimation$interrupt,
 					{
 						ctor: '::',
-						_0: _user$project$FadeAnimation$toHide,
+						_0: _user$project$FadeAnimation$wait(1 * _elm_lang$core$Time$second),
 						_1: {
 							ctor: '::',
-							_0: _user$project$FadeAnimation$toFadeIn(5 * _elm_lang$core$Time$second),
-							_1: {ctor: '[]'}
+							_0: A2(_user$project$FadeAnimation$playback, 0, _user$project$FadeAnimation$Hide),
+							_1: {
+								ctor: '::',
+								_0: A2(_user$project$FadeAnimation$playback, 5 * _elm_lang$core$Time$second, _user$project$FadeAnimation$FadeIn),
+								_1: {ctor: '[]'}
+							}
 						}
 					},
 					model.state);
@@ -9041,11 +9047,15 @@ var _user$project$Main$update = F2(
 					_user$project$FadeAnimation$interrupt,
 					{
 						ctor: '::',
-						_0: _user$project$FadeAnimation$toShow,
+						_0: A2(_user$project$FadeAnimation$playback, 0, _user$project$FadeAnimation$Show),
 						_1: {
 							ctor: '::',
-							_0: _user$project$FadeAnimation$toFadeOut(2 * _elm_lang$core$Time$second),
-							_1: {ctor: '[]'}
+							_0: _user$project$FadeAnimation$wait(2 * _elm_lang$core$Time$second),
+							_1: {
+								ctor: '::',
+								_0: A2(_user$project$FadeAnimation$playback, 2 * _elm_lang$core$Time$second, _user$project$FadeAnimation$FadeOut),
+								_1: {ctor: '[]'}
+							}
 						}
 					},
 					model.state);
@@ -9057,7 +9067,7 @@ var _user$project$Main$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
-				var newState = A2(_user$project$FadeAnimation$update, _p1._0, model.state);
+				var newState = A2(_user$project$FadeAnimation$update, _p0._0, model.state);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -9093,7 +9103,7 @@ var _user$project$Main$subscriptions = function (model) {
 var _user$project$Main$FadeOut = {ctor: 'FadeOut'};
 var _user$project$Main$FadeIn = {ctor: 'FadeIn'};
 var _user$project$Main$view = function (model) {
-	var _p2 = A2(_elm_lang$core$Debug$log, 'FadeAnimation', model);
+	var _p1 = A2(_elm_lang$core$Debug$log, 'FadeAnimation', model);
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
