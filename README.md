@@ -1,6 +1,6 @@
 # elm-fade-animation-assistant
 
-This library help you to switch state for css animation.
+This library help you to switch state for css animation.  
 It can construct sequence animation by combining multiple state.
 
 ## Usage
@@ -44,7 +44,7 @@ Please set `Msg` to update state.
             )
 ```
 
-Please config what you want to render for each state.
+Please config what you want to render for each state.  
 Someting in accord with a state will return.
 
 ```elm
