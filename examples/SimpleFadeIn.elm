@@ -49,8 +49,7 @@ update action model =
             let
                 newState =
                     FadeAnimation.interrupt
-                        [ FadeAnimation.wait (1 * second)
-                        , FadeAnimation.hide
+                        [ FadeAnimation.hide
                         , FadeAnimation.fadeIn (5 * second)
                         ]
                         model.state

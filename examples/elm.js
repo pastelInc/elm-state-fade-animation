@@ -9032,15 +9032,11 @@ var _user$project$Main$update = F2(
 					_user$project$FadeAnimation$interrupt,
 					{
 						ctor: '::',
-						_0: _user$project$FadeAnimation$wait(1 * _elm_lang$core$Time$second),
+						_0: _user$project$FadeAnimation$hide,
 						_1: {
 							ctor: '::',
-							_0: _user$project$FadeAnimation$hide,
-							_1: {
-								ctor: '::',
-								_0: _user$project$FadeAnimation$fadeIn(5 * _elm_lang$core$Time$second),
-								_1: {ctor: '[]'}
-							}
+							_0: _user$project$FadeAnimation$fadeIn(5 * _elm_lang$core$Time$second),
+							_1: {ctor: '[]'}
 						}
 					},
 					model.state);
