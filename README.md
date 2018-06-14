@@ -18,7 +18,7 @@ init =
     }
 ```
 
-The `subscribe` updates state using AnimationFrame when sequence animation is running.
+The `subscription` updates state using AnimationFrame when sequence animation is running.
 
 ```elm
 import FadeAnimation
