@@ -96,7 +96,9 @@ view model =
     in
     div
         []
-        [ viewContainer model
+        [ div [ class "containerWrapper" ]
+            [ viewContainer model
+            ]
         , button
             [ onClick FadeIn
             ]
@@ -120,11 +122,15 @@ viewContainer model =
         [ text "This container is animating." ]
 
 
-config : FadeAnimation.Config String
+config : FadeAnimation.Config
 config =
     FadeAnimation.config
-        { fadeIn = "container fadeIn"
-        , fadeOut = "container fadeOut"
-        , hide = "container hide"
-        , show = "container"
+        { into = True
+        , classNames = "container"
+        , timeout = 5 * Time.second
+        , enter = True
+
+        --, onEnter = ()
+        --, onEntering = ()
+        --, onEntered = ()
         }

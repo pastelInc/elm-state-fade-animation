@@ -2,19 +2,6 @@ module FadeAnimation
     exposing
         ( Config
         , FadeAnimation
-        , Msg
-        , config
-        , fadeIn
-        , fadeOut
-        , hidden
-        , hide
-        , interrupt
-        , render
-        , show
-        , subscription
-        , update
-        , visible
-        , wait
         )
 
 import AnimationFrame
@@ -23,203 +10,102 @@ import Time exposing (Time)
 
 type FadeAnimation
     = FadeAnimation
-        { playlists : List Animation
-        , state : State
-        , timing : Timing
-        , running : Bool
+        { appear : Bool
+        , enter : Bool
+        , into : Bool
+        , status : Status
+        , nextStatus : Maybe Status
         }
 
 
-type alias Timing =
-    { current : Time
-    , duration : Time
-    }
-
-
-type State
-    = FadeIn
-    | FadeOut
-    | Hide
-    | Show
-
-
-type Msg
-    = Tick Time
-
-
-type Animation
-    = Wait Time
-    | Animation Time State
-
-
-state : State -> FadeAnimation
-state current =
-    FadeAnimation
-        { playlists = []
-        , state = current
-        , timing =
-            { current = 0
-            , duration = 0
+init : Bool -> FadeAnimation
+init into =
+    if into then
+        FadeAnimation
+            { appear = False
+            , enter = False
+            , into = into
+            , status = Exited
+            , nextStatus = Just Entering
             }
-        , running = False
-        }
-
-
-visible : FadeAnimation
-visible =
-    state Show
-
-
-hidden : FadeAnimation
-hidden =
-    state Hide
-
-
-fadeIn : Time -> Animation
-fadeIn dt =
-    Animation dt FadeIn
-
-
-fadeOut : Time -> Animation
-fadeOut dt =
-    Animation dt FadeOut
-
-
-hide : Animation
-hide =
-    Animation 0 Hide
-
-
-show : Animation
-show =
-    Animation 0 Show
-
-
-wait : Time -> Animation
-wait =
-    Wait
-
-
-interrupt : List Animation -> FadeAnimation -> FadeAnimation
-interrupt playlists (FadeAnimation model) =
-    FadeAnimation
-        { model
-            | playlists = playlists
-            , running = True
-        }
-
-
-subscription : (Msg -> msg) -> List FadeAnimation -> Sub msg
-subscription msg states =
-    if List.any isRunning states then
-        Sub.map msg (AnimationFrame.times Tick)
     else
-        Sub.none
+        FadeAnimation
+            { appear = False
+            , enter = False
+            , into = into
+            , status = Exited
+            , nextStatus = Nothing
+            }
 
 
-isRunning : FadeAnimation -> Bool
-isRunning (FadeAnimation model) =
-    model.running
+updateStatus : FadeAnimation -> FadeAnimation
+updateStatus ((FadeAnimation { status, nextStatus }) as current) =
+    case nextStatus of
+        Just nextStatus_ ->
+            case nextStatus_ of
+                Entering ->
+                    --performEnter
+                    current
+
+                _ ->
+                    --performExit
+                    current
+
+        Nothing ->
+            case status of
+                Exited ->
+                    --Unmounted
+                    current
+
+                _ ->
+                    current
 
 
-update : Msg -> FadeAnimation -> FadeAnimation
-update (Tick now) (FadeAnimation ({ playlists, state } as model)) =
-    let
-        timing =
-            refreshTiming now model.timing
-
-        ( revisedState, revisedPlaylists ) =
-            resolvePlaylists state playlists timing.duration
-    in
-    FadeAnimation
-        { model
-            | playlists = revisedPlaylists
-            , state = revisedState
-            , timing = timing
-            , running =
-                List.length revisedPlaylists /= 0
-        }
+performEnter : FadeAnimation -> FadeAnimation
+performEnter current =
+    --if not enter then
+    --    ( Entered, onEntered )
+    --else
+    --    let
+    --        _ =
+    --            onEnter
+    --    in
+    --    Entering
+    current
 
 
-refreshTiming : Time -> Timing -> Timing
-refreshTiming now timing =
-    let
-        duration =
-            now - timing.current
-
-        -- NOTE:
-        -- If duration is longer than 2 frames, it is fixed to the time of 1 frame.
-        -- When duration is longer than 2 frames, it is as follows.
-        --    + the user leaves the browser window and returns
-        --    + subscription stops updating and starts updating again
-        --
-        -- If timing.current == 0, there are special cases that occur at startup.
-    in
-    { current = now
-    , duration =
-        if duration > 34 || timing.current == 0 then
-            16.666
-        else
-            duration
-    }
+type Status
+    = Entering
+    | Entered
+    | Exiting
+    | Exited
 
 
-resolvePlaylists : State -> List Animation -> Time -> ( State, List Animation )
-resolvePlaylists currentState playlists duration =
-    case playlists of
-        [] ->
-            ( currentState, [] )
-
-        animation :: queuedPlaylists ->
-            case animation of
-                Wait n ->
-                    if n <= 0 then
-                        resolvePlaylists currentState queuedPlaylists duration
-                    else
-                        ( currentState
-                        , (Wait <| n - duration) :: queuedPlaylists
-                        )
-
-                Animation n target ->
-                    ( target, List.reverse <| Wait n :: List.reverse queuedPlaylists )
-
-
-type Config a
+type Config
     = Config
-        { fadeIn : a
-        , fadeOut : a
-        , hide : a
-        , show : a
+        { into : Bool
+        , classNames : String
+        , timeout : Time
+        , enter : Bool
         }
 
 
 config :
-    { fadeIn : a
-    , fadeOut : a
-    , hide : a
-    , show : a
+    { into : Bool
+    , classNames : String
+    , timeout : Time
+    , enter : Bool
     }
-    -> Config a
-config { fadeIn, fadeOut, hide, show } =
+    -> Config
+config { into, classNames, timeout, enter } =
     Config
-        { fadeIn = fadeIn
-        , fadeOut = fadeOut
-        , hide = hide
-        , show = show
+        { into = into
+        , classNames = classNames
+        , timeout = timeout
+        , enter = enter
         }
 
 
-render : Config a -> FadeAnimation -> a
-render (Config { fadeIn, fadeOut, hide, show }) (FadeAnimation { state }) =
-    case state of
-        FadeIn ->
-            fadeIn
-
-        FadeOut ->
-            fadeOut
-
-        Hide ->
-            hide
-
-        Show ->
-            show
+render : Config -> FadeAnimation -> String
+render (Config { into, classNames, timeout, enter }) (FadeAnimation { status }) =
+    ""
