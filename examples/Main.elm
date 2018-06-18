@@ -13,7 +13,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = subscriptions
+        , subscriptions = \_ -> Sub.none
         }
 
 
@@ -25,67 +25,46 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     ( { state =
-            FadeAnimation.visible
+            FadeAnimation.init True
       }
     , Cmd.none
     )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    FadeAnimation.subscription Animate [ model.state ]
-
-
 type Msg
     = FadeIn
     | FadeOut
-    | Animate FadeAnimation.Msg
+
+
+
+--| Animate FadeAnimation.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
         FadeIn ->
-            let
-                newState =
-                    FadeAnimation.interrupt
-                        [ FadeAnimation.hide
-                        , FadeAnimation.fadeIn (5 * second)
-                        ]
-                        model.state
-            in
-            ( { model
-                | state = newState
-              }
+            ( model
             , Cmd.none
             )
 
         FadeOut ->
-            let
-                newState =
-                    FadeAnimation.interrupt
-                        [ FadeAnimation.show
-                        , FadeAnimation.wait (2 * second)
-                        , FadeAnimation.fadeOut (2 * second)
-                        ]
-                        model.state
-            in
-            ( { model
-                | state = newState
-              }
+            ( model
             , Cmd.none
             )
 
-        Animate animMsg ->
-            let
-                newState =
-                    FadeAnimation.update animMsg model.state
-            in
-            ( { model
-                | state = newState
-              }
-            , Cmd.none
-            )
+
+
+--Animate animMsg ->
+--    let
+--        newState =
+--            FadeAnimation.update animMsg model.state
+--    in
+--    ( { model
+--        | state = newState
+--      }
+--    , Cmd.none
+--    )
 
 
 view : Model -> Html Msg
@@ -125,12 +104,7 @@ viewContainer model =
 config : FadeAnimation.Config
 config =
     FadeAnimation.config
-        { into = True
+        { in_ = True
         , classNames = "container"
         , timeout = 5 * Time.second
-        , enter = True
-
-        --, onEnter = ()
-        --, onEntering = ()
-        --, onEntered = ()
         }

@@ -2,6 +2,12 @@ module FadeAnimation
     exposing
         ( Config
         , FadeAnimation
+        , Msg
+        , config
+        , init
+        , render
+        , subscription
+        , update
         )
 
 import AnimationFrame
@@ -10,32 +16,52 @@ import Time exposing (Time)
 
 type FadeAnimation
     = FadeAnimation
-        { appear : Bool
-        , enter : Bool
-        , into : Bool
+        { in_ : Bool
         , status : Status
         , nextStatus : Maybe Status
+        , mounting : Bool
         }
 
 
+type Msg
+    = Tick Time
+
+
 init : Bool -> FadeAnimation
-init into =
-    if into then
+init in_ =
+    if in_ then
         FadeAnimation
-            { appear = False
-            , enter = False
-            , into = into
+            { in_ = in_
             , status = Exited
             , nextStatus = Just Entering
+            , mounting = False
             }
     else
         FadeAnimation
-            { appear = False
-            , enter = False
-            , into = into
+            { in_ = in_
             , status = Exited
             , nextStatus = Nothing
+            , mounting = False
             }
+
+
+{-| 初期レンダリング後のイベント発火
+It like componentDidMount
+-}
+subscription : (Msg -> msgB) -> FadeAnimation -> Sub msgB
+subscription msg (FadeAnimation { mounting }) =
+    if not <| mounting then
+        Sub.map msg (AnimationFrame.times Tick)
+    else
+        Sub.none
+
+
+update : Msg -> FadeAnimation -> FadeAnimation
+update msg (FadeAnimation model) =
+    case msg of
+        Tick _ ->
+            FadeAnimation
+                { model | mounting = True }
 
 
 updateStatus : FadeAnimation -> FadeAnimation
@@ -47,18 +73,21 @@ updateStatus ((FadeAnimation { status, nextStatus }) as current) =
                     --performEnter
                     current
 
-                _ ->
+                Exiting ->
                     --performExit
                     current
 
-        Nothing ->
-            case status of
-                Exited ->
-                    --Unmounted
+                _ ->
+                    let
+                        _ =
+                            Debug.log
+                                "FadeAnimation"
+                                "nextStatus will always be ENTERING or EXITING."
+                    in
                     current
 
-                _ ->
-                    current
+        Nothing ->
+            current
 
 
 performEnter : FadeAnimation -> FadeAnimation
@@ -79,33 +108,45 @@ type Status
     | Entered
     | Exiting
     | Exited
+    | Unmounted
 
 
 type Config
     = Config
-        { into : Bool
+        { in_ : Bool
         , classNames : String
         , timeout : Time
-        , enter : Bool
         }
 
 
 config :
-    { into : Bool
+    { in_ : Bool
     , classNames : String
     , timeout : Time
-    , enter : Bool
     }
     -> Config
-config { into, classNames, timeout, enter } =
+config { in_, classNames, timeout } =
     Config
-        { into = into
+        { in_ = in_
         , classNames = classNames
         , timeout = timeout
-        , enter = enter
         }
 
 
 render : Config -> FadeAnimation -> String
-render (Config { into, classNames, timeout, enter }) (FadeAnimation { status }) =
-    ""
+render (Config { classNames, timeout }) (FadeAnimation { status, nextStatus }) =
+    case ( status, nextStatus ) of
+        ( Exited, Just Entering ) ->
+            classNames ++ "-enter"
+
+        ( Entering, _ ) ->
+            classNames ++ "-enter-active"
+
+        ( Entered, Just Exiting ) ->
+            classNames ++ "-exit"
+
+        ( Exiting, _ ) ->
+            classNames ++ "-exit-active"
+
+        _ ->
+            classNames
